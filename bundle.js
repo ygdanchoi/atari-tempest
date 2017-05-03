@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 class Game {
   constructor() {
-
+    this.quadrilaterals = [];
   }
 
   draw(context) {
@@ -98,16 +98,29 @@ class Game {
     context.fillStyle = '#000000';
     context.fillRect(0, 0, Game.DIM_X, Game.DIM_Y);
     context.strokeStyle = Game.BLUE;
-    this.defineQuadrilaterals(context, Game.TUBE_CIRCLE_OUTER, Game.TUBE_CIRCLE_INNER);
+    this.defineQuadrilaterals(Game.TUBE_CIRCLE_OUTER, Game.TUBE_CIRCLE_INNER);
+    this.drawQuadrilaterals(context);
   }
 
-  defineQuadrilaterals(context, outer, inner) {
+  defineQuadrilaterals(outer, inner) {
     for (let i = 0; i < outer.length - 1; i++) {
+      this.quadrilaterals.push([
+        outer[i],
+        outer[i + 1],
+        inner[i + 1],
+        inner[i],
+      ]);
+    }
+  }
+
+  drawQuadrilaterals(context) {
+    for (let i = 0; i < this.quadrilaterals.length; i++) {
+      const quadrilateral = this.quadrilaterals[i];
       context.beginPath();
-      context.moveTo(...outer[i]);
-      context.lineTo(...outer[i + 1]);
-      context.lineTo(...inner[i + 1]);
-      context.lineTo(...inner[i]);
+      context.moveTo(...quadrilateral[0]);
+      context.lineTo(...quadrilateral[1]);
+      context.lineTo(...quadrilateral[2]);
+      context.lineTo(...quadrilateral[3]);
       context.closePath();
       context.stroke();
     }
