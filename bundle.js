@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 class Game {
   constructor(canvasEl) {
     this.tubeQuads = [];
-    canvasEl.addEventListener('click', this.handleClick(canvasEl.getContext('2d')).bind(this));
+    canvasEl.addEventListener('mousemove', this.handleClick(canvasEl.getContext('2d')).bind(this));
   }
 
   draw(context) {
@@ -106,13 +106,15 @@ class Game {
   }
 
   defineTubeQuads(outer, inner) {
-    for (let i = 0; i < outer.length - 1; i++) {
-      this.tubeQuads.push([
-        outer[i],
-        outer[i + 1],
-        inner[i + 1],
-        inner[i],
-      ]);
+    if (this.tubeQuads.length === 0) {
+      for (let i = 0; i < outer.length - 1; i++) {
+        this.tubeQuads.push([
+          outer[i],
+          outer[i + 1],
+          inner[i + 1],
+          inner[i],
+        ]);
+      }
     }
   }
 
@@ -135,6 +137,7 @@ class Game {
         const point = [e.clientX, e.clientY];
         const boundary = this.tubeQuads[i];
         if (this.isInside(point, boundary)) {
+          this.draw(context);
           this.drawTubeQuad(context, this.tubeQuads[i]);
           return i;
         }
@@ -156,7 +159,6 @@ class Game {
   }
 
   drawTubeQuad(context, tubeQuad) {
-    this.draw(context);
     context.strokeStyle = '#ffff00';
     context.beginPath();
     context.moveTo(...tubeQuad[1]);
