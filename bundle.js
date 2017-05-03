@@ -78,8 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
   canvasEl.width = Game.DIM_X;
   canvasEl.height = Game.DIM_Y;
 
-  const game = new Game();
-  new GameView(game, canvasEl);
+  context = canvasEl.getContext('2d');
+
+
+  const game = new Game(canvasEl);
+  new GameView(game, context);
 });
 
 
@@ -88,8 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
 /***/ (function(module, exports) {
 
 class Game {
-  constructor() {
+  constructor(canvasEl) {
     this.tubeQuads = [];
+    canvasEl.addEventListener('click', this.handleClick(canvasEl.getContext('2d')).bind(this));
   }
 
   draw(context) {
@@ -123,6 +127,44 @@ class Game {
       context.closePath();
       context.stroke();
     }
+  }
+
+  handleClick(context) {
+    return (e) => {
+      for (let i = 0; i < this.tubeQuads.length; i++) {
+        const point = [e.clientX, e.clientY];
+        const boundary = this.tubeQuads[i];
+        if (this.isInside(point, boundary)) {
+          this.drawTubeQuad(context, this.tubeQuads[i]);
+          return i;
+        }
+      }
+      return -1;
+    };
+  }
+
+  isInside(point, boundary) {
+    let result = false;
+    // http://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    for (let i = 0, j = boundary.length - 1; i < boundary.length; j = i++) {
+      if ((boundary[i][1] > point[1]) != (boundary[j][1] > point[1]) &&
+          (point[0] < (boundary[j][0] - boundary[i][0]) * (point[1] - boundary[i][1]) / (boundary[j][1] - boundary[i][1]) + boundary[i][0])) {
+        result = !result;
+      }
+    }
+    return result;
+  }
+
+  drawTubeQuad(context, tubeQuad) {
+    this.draw(context);
+    context.strokeStyle = '#ffff00';
+    context.beginPath();
+    context.moveTo(...tubeQuad[1]);
+    context.lineTo(...tubeQuad[2]);
+    context.moveTo(...tubeQuad[3]);
+    context.lineTo(...tubeQuad[0]);
+    context.closePath();
+    context.stroke();
   }
 
 }
@@ -178,50 +220,11 @@ module.exports = Game;
 /***/ (function(module, exports) {
 
 class GameView {
-  constructor(game, canvasEl) {
+  constructor(game, context) {
     this.game = game;
-    this.canvasEl = canvasEl;
-    this.context = canvasEl.getContext('2d');
-    game.draw(this.context);
-    this.canvasEl.addEventListener('click', this.handleClick.bind(this));
+    this.game.draw(context);
   }
 
-  handleClick(e) {
-    for (let i = 0; i < this.game.tubeQuads.length; i++) {
-      const point = [e.clientX, e.clientY];
-      const boundary = this.game.tubeQuads[i];
-      if (this.isInside(point, boundary)) {
-        console.log(i);
-        this.drawTubeQuad(this.game.tubeQuads[i]);
-        return i;
-      }
-    }
-    console.log(-1);
-    return -1;
-  }
-
-  isInside(point, boundary) {
-    let result = false;
-    // http://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
-    for (let i = 0, j = boundary.length - 1; i < boundary.length; j = i++) {
-      if ((boundary[i][1] > point[1]) != (boundary[j][1] > point[1]) &&
-          (point[0] < (boundary[j][0] - boundary[i][0]) * (point[1] - boundary[i][1]) / (boundary[j][1] - boundary[i][1]) + boundary[i][0])) {
-        result = !result;
-      }
-    }
-    return result;
-  }
-
-  drawTubeQuad(tubeQuad) {
-    this.context.strokeStyle = '#ffff00';
-    this.context.beginPath();
-    this.context.moveTo(...tubeQuad[1]);
-    this.context.lineTo(...tubeQuad[2]);
-    this.context.moveTo(...tubeQuad[3]);
-    this.context.lineTo(...tubeQuad[0]);
-    this.context.closePath();
-    this.context.stroke();
-  }
 }
 
 module.exports = GameView;
