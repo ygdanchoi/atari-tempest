@@ -130,6 +130,7 @@ class Game {
 Game.DIM_X = 512;
 Game.DIM_Y = 450;
 Game.BLUE = '#0000cc';
+Game.YELLOW = '#ffff00';
 Game.TUBE_CIRCLE_OUTER = [
   [256, 60],
   [316, 73],
@@ -180,7 +181,8 @@ class GameView {
   constructor(game, canvasEl) {
     this.game = game;
     this.canvasEl = canvasEl;
-    game.draw(canvasEl.getContext('2d'));
+    this.context = canvasEl.getContext('2d');
+    game.draw(this.context);
     this.canvasEl.addEventListener('click', this.handleClick.bind(this));
   }
 
@@ -190,6 +192,7 @@ class GameView {
       const boundary = this.game.tubeQuads[i];
       if (this.isInside(point, boundary)) {
         console.log(i);
+        this.drawTubeQuad(this.game.tubeQuads[i]);
         return i;
       }
     }
@@ -207,6 +210,17 @@ class GameView {
       }
     }
     return result;
+  }
+
+  drawTubeQuad(tubeQuad) {
+    this.context.strokeStyle = '#ffff00';
+    this.context.beginPath();
+    this.context.moveTo(...tubeQuad[0]);
+    this.context.lineTo(...tubeQuad[1]);
+    this.context.lineTo(...tubeQuad[2]);
+    this.context.lineTo(...tubeQuad[3]);
+    this.context.closePath();
+    this.context.stroke();
   }
 }
 
