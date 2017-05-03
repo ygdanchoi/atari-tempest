@@ -68,21 +68,58 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-DIM_X = 512;
-DIM_Y = 450;
+const Game = __webpack_require__(1);
+const GameView = __webpack_require__(2);
 
 document.addEventListener('DOMContentLoaded', () => {
   const canvasEl = document.getElementsByTagName('canvas')[0];
-  canvasEl.width = DIM_X;
-  canvasEl.height = DIM_Y;
+  canvasEl.width = Game.DIM_X;
+  canvasEl.height = Game.DIM_Y;
 
   const ctx = canvasEl.getContext('2d');
-  ctx.clearRect(0, 0, DIM_X, DIM_Y);
-  ctx.fillStyle = '#000000';
-  ctx.fillRect(0, 0, DIM_X, DIM_Y);
+  const game = new Game();
+  new GameView(game, ctx);
 });
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+class Game {
+  constructor() {
+
+  }
+
+  draw(ctx) {
+    ctx.clearRect(0, 0, Game.DIM_X, Game.DIM_Y);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, Game.DIM_X, Game.DIM_Y);
+  }
+}
+
+Game.DIM_X = 512;
+Game.DIM_Y = 450;
+
+module.exports = Game;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+class GameView {
+  constructor(game, ctx) {
+    this.game = game;
+    this.ctx = ctx;
+    game.draw(ctx);
+  }
+
+}
+
+module.exports = GameView;
 
 
 /***/ })
