@@ -78,9 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
   canvasEl.width = Game.DIM_X;
   canvasEl.height = Game.DIM_Y;
 
-  const context = canvasEl.getContext('2d');
   const game = new Game();
-  new GameView(game, context);
+  new GameView(game, canvasEl);
 });
 
 
@@ -90,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 class Game {
   constructor() {
-    this.quadrilaterals = [];
+    this.tubeQuads = [];
   }
 
   draw(context) {
@@ -98,13 +97,13 @@ class Game {
     context.fillStyle = '#000000';
     context.fillRect(0, 0, Game.DIM_X, Game.DIM_Y);
     context.strokeStyle = Game.BLUE;
-    this.defineQuadrilaterals(Game.TUBE_CIRCLE_OUTER, Game.TUBE_CIRCLE_INNER);
-    this.drawQuadrilaterals(context);
+    this.defineTubeQuads(Game.TUBE_CIRCLE_OUTER, Game.TUBE_CIRCLE_INNER);
+    this.drawTubeQuads(context);
   }
 
-  defineQuadrilaterals(outer, inner) {
+  defineTubeQuads(outer, inner) {
     for (let i = 0; i < outer.length - 1; i++) {
-      this.quadrilaterals.push([
+      this.tubeQuads.push([
         outer[i],
         outer[i + 1],
         inner[i + 1],
@@ -113,9 +112,9 @@ class Game {
     }
   }
 
-  drawQuadrilaterals(context) {
-    for (let i = 0; i < this.quadrilaterals.length; i++) {
-      const quadrilateral = this.quadrilaterals[i];
+  drawTubeQuads(context) {
+    for (let i = 0; i < this.tubeQuads.length; i++) {
+      const quadrilateral = this.tubeQuads[i];
       context.beginPath();
       context.moveTo(...quadrilateral[0]);
       context.lineTo(...quadrilateral[1]);
@@ -178,12 +177,37 @@ module.exports = Game;
 /***/ (function(module, exports) {
 
 class GameView {
-  constructor(game, ctx) {
+  constructor(game, canvasEl) {
     this.game = game;
-    this.ctx = ctx;
-    game.draw(ctx);
+    this.canvasEl = canvasEl;
+    game.draw(canvasEl.getContext('2d'));
+    this.canvasEl.addEventListener('click', this.handleClick.bind(this));
   }
 
+  handleClick(e) {
+    for (let i = 0; i < this.game.tubeQuads.length; i++) {
+      const point = [e.clientX, e.clientY];
+      const boundary = this.game.tubeQuads[i];
+      if (this.isInside(point, boundary)) {
+        console.log(i);
+        return i;
+      }
+    }
+    console.log(-1);
+    return -1;
+  }
+
+  isInside(point, boundary) {
+    let result = false;
+    // http://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    for (let i = 0, j = boundary.length - 1; i < boundary.length; j = i++) {
+      if ((boundary[i][1] > point[1]) != (boundary[j][1] > point[1]) &&
+          (point[0] < (boundary[j][0] - boundary[i][0]) * (point[1] - boundary[i][1]) / (boundary[j][1] - boundary[i][1]) + boundary[i][0])) {
+        result = !result;
+      }
+    }
+    return result;
+  }
 }
 
 module.exports = GameView;
