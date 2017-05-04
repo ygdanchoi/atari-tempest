@@ -244,8 +244,26 @@ class GameView {
 
   bindHandlers(canvasEl) {
     canvasEl.addEventListener('mousemove', this.game.handleMouseMove(this.context));
-    canvasEl.addEventListener('click', this.blaster.fireBullet.bind(this.blaster));
-    key('space', this.blaster.fireBullet.bind(this.blaster));
+    canvasEl.addEventListener('mousedown', () => {
+      this.blaster.firing = true;
+    });
+    canvasEl.addEventListener('mouseup', () => {
+      this.blaster.firing = false;
+    });
+    document.addEventListener('keydown', (e) => {
+      switch (e.code) {
+        case 'Space':
+          this.blaster.firing = true;
+          break;
+      }
+    });
+    document.addEventListener('keyup', (e) => {
+      switch (e.code) {
+        case 'Space':
+          this.blaster.firing = false;
+          break;
+      }
+    });
   }
 
   start() {
@@ -405,10 +423,14 @@ class Blaster extends MovingObject {
     super(options);
     this.xPos = options.xPos;
     this.tubeQuad = options.tubeQuad;
+    this.firing = false;
   }
 
   draw(context) {
     this.drawTubeQuad(context, this.tubeQuad);
+    if (this.firing) {
+      this.fireBullet();
+    }
   }
 
   drawTubeQuad(context, tubeQuad) {
