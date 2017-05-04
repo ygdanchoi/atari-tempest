@@ -224,6 +224,7 @@ class GameView {
     this.blaster = this.game.addBlaster();
 
     canvasEl.addEventListener('mousemove', game.handleMouseMove(this.context));
+    canvasEl.addEventListener('click', this.blaster.fireBullet.bind(this.blaster));
   }
 
   start() {
@@ -345,6 +346,7 @@ module.exports = MovingObject;
 /***/ (function(module, exports, __webpack_require__) {
 
 const MovingObject = __webpack_require__(5);
+const BlasterBullet = __webpack_require__(7);
 
 class Blaster extends MovingObject {
   constructor(options) {
@@ -358,7 +360,6 @@ class Blaster extends MovingObject {
   }
 
   drawTubeQuad(context, tubeQuad) {
-    console.log(this.xPos);
     context.strokeStyle = '#ffff00';
     context.beginPath();
     context.moveTo(...tubeQuad[1]);
@@ -368,9 +369,50 @@ class Blaster extends MovingObject {
     context.closePath();
     context.stroke();
   }
+
+  fireBullet() {
+    console.log('fire');
+    const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
+    const blasterBullet = new BlasterBullet({
+      pos: tubeQuad[0]
+    });
+    this.game.blasterBullets.push(blasterBullet);
+  }
 }
 
 module.exports = Blaster;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const MovingObject = __webpack_require__(5);
+
+class BlasterBullet extends MovingObject {
+  constructor(options) {
+    super(options);
+    this.pos = options.pos;
+  }
+
+  draw(context) {
+    context.fillStyle = '#ffffff';
+    context.beginPath();
+    context.arc(
+      this.pos[0], this.pos[1], 3, 0, 2 * Math.PI, true
+    );
+    context.fill();
+  }
+
+  move(delta) {
+    this.pos = [
+      this.pos[0] + 2,
+      this.pos[1] + 2,
+    ];
+  }
+}
+
+module.exports = BlasterBullet;
 
 
 /***/ })
