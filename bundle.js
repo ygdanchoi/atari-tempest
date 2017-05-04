@@ -85,6 +85,12 @@ class Game {
     this.flippers = [];
     this.enemyBullets = [];
     this.enemyExplosions = [];
+
+    this.add(new Flipper({
+      xVel: Math.random() < 0.5 ? -1 : 1,
+      xPos: Math.floor(112 * Math.random()),
+      game: this
+    }));
   }
 
   add(object) {
@@ -444,6 +450,16 @@ const Util = {
     const y2 = point2[1];
     return (y2 - y1) / (x2 - x1);
   },
+
+  rotateAroundPoint(point1, point2, angle) {
+    const x1 = point1[0];
+    const y1 = point1[1];
+    const x2 = point2[0];
+    const y2 = point2[1];
+    const x = (x1 - x2) * Math.cos(angle) - (y1 - y2) * Math.sin(angle) + x2;
+    const y = (x1 - x2) * Math.sin(angle) + (y1 - y2) * Math.cos(angle) + y2;
+    return [x, y];
+  },
 };
 
 module.exports = Util;
@@ -636,21 +652,23 @@ class Flipper extends MovingObject {
     const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
     context.fillStyle = '#ff0000';
     context.beginPath();
-    const posFrom = Util.midpoint(tubeQuad[0], tubeQuad[1]);
-    const posTo = Util.midpoint(tubeQuad[2], tubeQuad[3]);
     const zFraction = this.zPos / Flipper.MAX_Z_POS;
     const easeFraction = 1 - Math.pow(zFraction - 1, 2);
-    const vectorTo = Util.vector(posFrom, posTo, easeFraction);
     const vectorTo0 = Util.vector(tubeQuad[0], tubeQuad[3], easeFraction);
     const vectorTo1 = Util.vector(tubeQuad[1], tubeQuad[2], easeFraction);
-    const pos = Util.addVector(posFrom, vectorTo);
-    context.font = 'bold 12px Arial';
-    context.fillText(this.xPosInTubeQuad, pos[0], pos[1]);
+    let pos0 = Util.addVector(tubeQuad[0], vectorTo0);
+    let pos1 = Util.addVector(tubeQuad[1], vectorTo1);
     context.fill();
+    const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
+    if (this.xPosInTubeQuad > midFlip) {
+      pos0 = Util.rotateAroundPoint(pos0, pos1, - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+    } else {
+      pos1 = Util.rotateAroundPoint(pos1, pos0, - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+    }
 
     context.strokeStyle = '#ff0000';
-    context.moveTo(...Util.addVector(tubeQuad[0], vectorTo0));
-    context.lineTo(...Util.addVector(tubeQuad[1], vectorTo1));
+    context.moveTo(...pos0);
+    context.lineTo(...pos1);
     context.stroke();
     if (Math.random() < 0.01) {
       this.fireBullet();
