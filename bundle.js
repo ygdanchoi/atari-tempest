@@ -74,6 +74,7 @@ const Util = __webpack_require__(4);
 const Blaster = __webpack_require__(6);
 const BlasterBullet = __webpack_require__(7);
 const Flipper = __webpack_require__(8);
+const EnemyBullet = __webpack_require__(10);
 const EnemyExplosion = __webpack_require__(9);
 
 class Game {
@@ -82,10 +83,12 @@ class Game {
     this.blasters = [];
     this.blasterBullets = [];
     this.flippers = [];
+    this.enemyBullets = [];
     this.enemyExplosions = [];
 
     this.add(new Flipper({ xVel: 1, xPos: Math.floor(112 * Math.random()), game: this }));
     this.add(new Flipper({ xVel: -1, xPos: Math.floor(112 * Math.random()), game: this }));
+    this.add(new EnemyBullet({ tubeQuadIdx: Math.floor(16 * Math.random()), zPos: Math.floor(120 * Math.random()), game: this }));
   }
 
   add(object) {
@@ -95,6 +98,8 @@ class Game {
       this.blasterBullets.push(object);
     } else if (object instanceof Flipper) {
       this.flippers.push(object);
+    } else if (object instanceof EnemyBullet) {
+      this.enemyBullets.push(object);
     } else if (object instanceof EnemyExplosion) {
       this.enemyExplosions.push(object);
     } else {
@@ -115,6 +120,7 @@ class Game {
       this.blasters,
       this.blasterBullets,
       this.flippers,
+      this.enemyBullets,
       this.enemyExplosions,
     );
   }
@@ -124,12 +130,13 @@ class Game {
       this.blasters,
       this.blasterBullets
     );
-    const enemies = [].concat(
-      this.flippers
+    const enemyObjects = [].concat(
+      this.flippers,
+      this.enemyBullets
     );
-    for (let i = 0; i < enemies.length; i++) {
+    for (let i = 0; i < enemyObjects.length; i++) {
       for (let j = 0; j < blasterObjects.length; j++) {
-        const enemy = enemies[i];
+        const enemy = enemyObjects[i];
         const blasterObject = blasterObjects[j];
         if (enemy.isCollidedWith(blasterObject)) {
           enemy.collideWith(blasterObject);
@@ -200,11 +207,14 @@ class Game {
 
   remove(object) {
     if (object instanceof Blaster) {
+      console.log('you died');
       this.blasters = [];
     } else if (object instanceof BlasterBullet) {
       this.blasterBullets.splice(this.blasterBullets.indexOf(object), 1);
     } else if (object instanceof Flipper) {
       this.flippers.splice(this.flippers.indexOf(object), 1);
+    } else if (object instanceof EnemyBullet) {
+      this.enemyBullets.splice(this.enemyBullets.indexOf(object), 1);
     } else if (object instanceof EnemyExplosion) {
       this.enemyExplosions.splice(this.enemyExplosions.indexOf(object), 1);
     } else {
@@ -746,6 +756,77 @@ class EnemyExplosion extends MovingObject {
 EnemyExplosion.MAX_Z_POS = 120;
 
 module.exports = EnemyExplosion;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const MovingObject = __webpack_require__(5);
+const BlasterBullet = __webpack_require__(7);
+const Blaster = __webpack_require__(6);
+const EnemyExplosion = __webpack_require__(9);
+const Util = __webpack_require__(4);
+
+class EnemyBullet extends MovingObject {
+  constructor(options) {
+    super(options);
+    this.tubeQuadIdx = options.tubeQuadIdx;
+    this.zPos = options.zPos;
+  }
+
+  draw(context) {
+    const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
+    context.fillStyle = '#ffffff';
+    context.beginPath();
+    const posFrom = Util.midpoint(tubeQuad[0], tubeQuad[1]);
+    const posTo = Util.midpoint(tubeQuad[2], tubeQuad[3]);
+    const zFraction = this.zPos / EnemyBullet.MAX_Z_POS;
+    const easeFraction = 1 - Math.pow(zFraction - 1, 2);
+    const vectorTo = Util.vector(posFrom, posTo, easeFraction);
+    const pos = Util.addVector(posFrom, vectorTo);
+    context.arc(
+      pos[0], pos[1], 3 * (1 - easeFraction) + 1, 0, 2 * Math.PI, true
+    );
+    context.fill();
+  }
+
+  isCollidedWith(blasterObject) {
+    if (blasterObject instanceof BlasterBullet) {
+      return this.tubeQuadIdx === blasterObject.tubeQuadIdx && Math.abs(blasterObject.zPos - this.zPos) < 5;
+    } else if (blasterObject instanceof Blaster) {
+      return this.tubeQuadIdx === blasterObject.tubeQuadIdx && this.zPos === 0;
+    }
+  }
+
+  collideWith(blasterObject) {
+    if (blasterObject instanceof BlasterBullet) {
+      this.remove();
+      blasterObject.remove();
+      this.game.add(new EnemyExplosion({
+        tubeQuadIdx: this.tubeQuadIdx,
+        zPos: this.zPos,
+        game: this.game
+      }));
+    } else if (blasterObject instanceof Blaster) {
+      blasterObject.remove();
+    }
+  }
+
+  move(delta) {
+    if (this.zPos === 0) {
+      this.remove();
+    }
+    this.zPos -= 2;
+    if (this.zPos < 0) {
+      this.zPos = 0;
+    }
+  }
+}
+
+EnemyBullet.MAX_Z_POS = 120;
+
+module.exports = EnemyBullet;
 
 
 /***/ })
