@@ -249,13 +249,15 @@ class GameView {
   }
 
   start() {
-    requestAnimationFrame(this.animate.bind(this));
+    // requestAnimationFrame(this.animate.bind(this));
+    setTimeout(this.animate.bind(this), 40);
   }
 
   animate(time) {
     this.game.step();
     this.game.draw(this.context);
-    requestAnimationFrame(this.animate.bind(this));
+    // requestAnimationFrame(this.animate.bind(this));
+    setTimeout(this.animate.bind(this), 40);
   }
 
 }
@@ -453,10 +455,11 @@ class BlasterBullet extends MovingObject {
     const posFrom = Util.midpoint(this.tubeQuad[0], this.tubeQuad[1]);
     const posTo = Util.midpoint(this.tubeQuad[2], this.tubeQuad[3]);
     const zFraction = this.zPos / BlasterBullet.MAX_Z_POS;
-    const vectorTo = Util.vector(posFrom, posTo, zFraction);
+    const easeFraction = 1 - Math.pow(zFraction - 1, 2);
+    const vectorTo = Util.vector(posFrom, posTo, easeFraction);
     const pos = Util.addVector(posFrom, vectorTo);
     context.arc(
-      pos[0], pos[1], 3 * (1 - zFraction) + 1, 0, 2 * Math.PI, true
+      pos[0], pos[1], 3 * (1 - easeFraction) + 1, 0, 2 * Math.PI, true
     );
     context.fill();
   }
