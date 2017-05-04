@@ -75,17 +75,23 @@ const Blaster = __webpack_require__(6);
 
 class Game {
   constructor(canvasEl) {
+    this.tubeQuads = [];
+    this.blasters = [];
+    this.blasterBullets = [];
+    canvasEl.addEventListener('mousemove', this.handleMouseMove(canvasEl.getContext('2d')).bind(this));
+    canvasEl.addEventListener('click', this.step.bind(this));
+  }
+
+  addBlaster() {
     const blaster = new Blaster({
       xPos: 0,
       tubeQuadIdx: 0,
       game: this,
     });
 
-    this.tubeQuads = [];
-    this.blasters = [blaster];
-    this.blasterBullets = [];
-    canvasEl.addEventListener('mousemove', this.handleMouseMove(canvasEl.getContext('2d')).bind(this));
-    canvasEl.addEventListener('click', this.step.bind(this));
+    this.blasters.push(blaster);
+
+    return blaster;
   }
 
   allObjects() {
@@ -217,6 +223,7 @@ class GameView {
     this.game = game;
     this.context = context;
     this.game.draw(this.context);
+    this.blaster = this.game.addBlaster();
   }
 
   start() {
