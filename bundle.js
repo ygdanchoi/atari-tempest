@@ -194,7 +194,9 @@ class Game {
   }
 
   remove(object) {
-    if (object instanceof BlasterBullet) {
+    if (object instanceof Blaster) {
+      this.blasters = [];
+    } else if (object instanceof BlasterBullet) {
       this.blasterBullets.splice(this.blasterBullets.indexOf(object), 1);
     } else if (object instanceof Flipper) {
       this.flippers.splice(this.flippers.indexOf(object), 1);
@@ -589,6 +591,7 @@ module.exports = BlasterBullet;
 
 const MovingObject = __webpack_require__(5);
 const BlasterBullet = __webpack_require__(7);
+const Blaster = __webpack_require__(6);
 const Util = __webpack_require__(4);
 
 class Flipper extends MovingObject {
@@ -622,15 +625,18 @@ class Flipper extends MovingObject {
     if (blasterObject instanceof BlasterBullet) {
       const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
       const blasterObjectXPos = blasterObject.tubeQuadIdx * Flipper.NUM_FLIPPER_POSITIONS + midFlip;
-      return Math.abs(blasterObjectXPos - this.xPos) < Flipper.NUM_FLIPPER_POSITIONS && Math.abs(blasterObject.zPos - this.zPos) < 10;
+      return Math.abs(blasterObjectXPos - this.xPos) < Flipper.NUM_FLIPPER_POSITIONS && Math.abs(blasterObject.zPos - this.zPos) < 5;
+    } else if (blasterObject instanceof Blaster) {
+      return this.tubeQuadIdx === blasterObject.tubeQuadIdx && this.zPos === 0;
     }
   }
 
   collideWith(blasterObject) {
     if (blasterObject instanceof BlasterBullet) {
-      const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
-      const blasterObjectXPos = blasterObject.tubeQuadIdx * Flipper.NUM_FLIPPER_POSITIONS + midFlip;
-      debugger;
+      this.remove();
+      blasterObject.remove();
+    } else if (blasterObject instanceof Blaster) {
+      blasterObject.remove();
     }
   }
 
