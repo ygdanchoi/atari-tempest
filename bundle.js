@@ -268,14 +268,14 @@ class GameView {
 
   start() {
     // requestAnimationFrame(this.animate.bind(this));
-    setTimeout(this.animate.bind(this), 40);
+    setTimeout(this.animate.bind(this), 40); // 25 fps
   }
 
   animate(time) {
     this.game.step();
     this.game.draw(this.context);
     // requestAnimationFrame(this.animate.bind(this));
-    setTimeout(this.animate.bind(this), 40);
+    setTimeout(this.animate.bind(this), 40); // 25 fps
   }
 
 }
@@ -446,13 +446,17 @@ class Blaster extends MovingObject {
 
   fireBullet() {
     const tubeQuad = this.tubeQuad;
-    const blasterBullet = new BlasterBullet({
-      game: this.game,
-      tubeQuad: this.tubeQuad,
-    });
-    this.game.add(blasterBullet);
+    if (this.game.blasterBullets.length < 8) {
+      const blasterBullet = new BlasterBullet({
+        game: this.game,
+        tubeQuad: this.tubeQuad,
+      });
+      this.game.add(blasterBullet);
+    }
   }
 }
+
+Blaster.MAX_NUM_BULLETS = 8;
 
 module.exports = Blaster;
 
