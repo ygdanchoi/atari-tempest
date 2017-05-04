@@ -195,6 +195,7 @@ class Game {
 
   remove(object) {
     if (object instanceof Blaster) {
+      alert('you died');
       this.blasters = [];
     } else if (object instanceof BlasterBullet) {
       this.blasterBullets.splice(this.blasterBullets.indexOf(object), 1);
@@ -627,7 +628,9 @@ class Flipper extends MovingObject {
       const blasterObjectXPos = blasterObject.tubeQuadIdx * Flipper.NUM_FLIPPER_POSITIONS + midFlip;
       return Math.abs(blasterObjectXPos - this.xPos) < Flipper.NUM_FLIPPER_POSITIONS && Math.abs(blasterObject.zPos - this.zPos) < 5;
     } else if (blasterObject instanceof Blaster) {
-      return this.tubeQuadIdx === blasterObject.tubeQuadIdx && this.zPos === 0;
+      const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
+      const blasterObjectXPos = blasterObject.tubeQuadIdx * Flipper.NUM_FLIPPER_POSITIONS + midFlip;
+      return this.xPos === blasterObjectXPos && this.zPos === 0;
     }
   }
 
