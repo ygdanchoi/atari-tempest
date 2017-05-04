@@ -83,6 +83,7 @@ class Game {
     this.flippers = [];
 
     this.add(new Flipper({ xVel: 1, xPos: Math.floor(112 * Math.random()), game: this }));
+    this.add(new Flipper({ xVel: -1, xPos: Math.floor(112 * Math.random()), game: this }));
   }
 
   add(object) {
@@ -111,6 +112,25 @@ class Game {
       this.blasterBullets,
       this.flippers
     );
+  }
+
+  checkCollisions() {
+    const blasterObjects = [].concat(
+      this.blasters,
+      this.blasterBullets
+    );
+    const enemies = [].concat(
+      this.flippers
+    );
+    for (let i = 0; i < enemies.length; i++) {
+      for (let j = 0; j < blasterObjects.length; j++) {
+        const enemy = enemies[i];
+        const blasterObject = blasterObjects[j];
+        if (enemy.isCollidedWith(blasterObject)) {
+          enemy.collideWith(blasterObject);
+        }
+      }
+    }
   }
 
   draw(context) {
@@ -184,6 +204,7 @@ class Game {
   }
 
   step(delta) {
+    this.checkCollisions();
     this.moveObjects(delta);
   }
 
@@ -567,6 +588,7 @@ module.exports = BlasterBullet;
 /***/ (function(module, exports, __webpack_require__) {
 
 const MovingObject = __webpack_require__(5);
+const BlasterBullet = __webpack_require__(7);
 const Util = __webpack_require__(4);
 
 class Flipper extends MovingObject {
@@ -596,6 +618,22 @@ class Flipper extends MovingObject {
     context.fill();
   }
 
+  isCollidedWith(blasterObject) {
+    if (blasterObject instanceof BlasterBullet) {
+      const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
+      const blasterObjectXPos = blasterObject.tubeQuadIdx * Flipper.NUM_FLIPPER_POSITIONS + midFlip;
+      return Math.abs(blasterObjectXPos - this.xPos) < Flipper.NUM_FLIPPER_POSITIONS && Math.abs(blasterObject.zPos - this.zPos) < 10;
+    }
+  }
+
+  collideWith(blasterObject) {
+    if (blasterObject instanceof BlasterBullet) {
+      const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
+      const blasterObjectXPos = blasterObject.tubeQuadIdx * Flipper.NUM_FLIPPER_POSITIONS + midFlip;
+      debugger;
+    }
+  }
+
   move(delta) {
     if (this.zPos > 0) {
       this.zPos -= 1;
@@ -610,7 +648,7 @@ class Flipper extends MovingObject {
       } else if (this.xPos >= numXPos) {
         this.xPos -= numXPos;
       }
-      if (this.xPosInTubeQuad === Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2) - 1) {
+      if (this.xPosInTubeQuad + this.xVel === Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2)) {
         if (this.zPos > 0) {
           this.waiting = this.wait;
         } else {
