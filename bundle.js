@@ -239,9 +239,13 @@ class GameView {
     this.context = canvasEl.getContext('2d');
     this.game.draw(this.context);
     this.blaster = this.game.addBlaster();
+    this.bindHandlers(canvasEl);
+  }
 
-    canvasEl.addEventListener('mousemove', game.handleMouseMove(this.context));
+  bindHandlers(canvasEl) {
+    canvasEl.addEventListener('mousemove', this.game.handleMouseMove(this.context));
     canvasEl.addEventListener('click', this.blaster.fireBullet.bind(this.blaster));
+    key('space', this.blaster.fireBullet.bind(this.blaster));
   }
 
   start() {
@@ -448,10 +452,11 @@ class BlasterBullet extends MovingObject {
     context.beginPath();
     const posFrom = Util.midpoint(this.tubeQuad[0], this.tubeQuad[1]);
     const posTo = Util.midpoint(this.tubeQuad[2], this.tubeQuad[3]);
-    const vectorTo = Util.vector(posFrom, posTo, this.zPos / BlasterBullet.MAX_Z_POS);
+    const zFraction = this.zPos / BlasterBullet.MAX_Z_POS;
+    const vectorTo = Util.vector(posFrom, posTo, zFraction);
     const pos = Util.addVector(posFrom, vectorTo);
     context.arc(
-      pos[0], pos[1], 3, 0, 2 * Math.PI, true
+      pos[0], pos[1], 3 * (1 - zFraction) + 1, 0, 2 * Math.PI, true
     );
     context.fill();
   }
