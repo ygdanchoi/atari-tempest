@@ -92,7 +92,7 @@ class Game {
   addBlaster() {
     const blaster = new Blaster({
       xPos: 0,
-      tubeQuadIdx: 0,
+      tubeQuad: this.tubeQuads[0],
       game: this,
     });
 
@@ -150,11 +150,9 @@ class Game {
         const boundary = this.tubeQuads[i];
         if (Util.isInside(point, boundary)) {
           this.blasters[0].xPos = this.xPosInTubeQuad(point, boundary);
-          this.blasters[0].tubeQuadIdx = i;
-          return i;
+          this.blasters[0].tubeQuad = this.tubeQuads[i];
         }
       }
-      return -1;
     };
   }
 
@@ -317,6 +315,30 @@ const Util = {
     return distBack / distTotal;
   },
 
+  midpoint(point1, point2) {
+    const x1 = point1[0];
+    const y1 = point1[1];
+    const x2 = point2[0];
+    const y2 = point2[1];
+    return [(x1 + x2) / 2, (y1 + y2) / 2];
+  },
+
+  vector(point1, point2, scalar) {
+    const x1 = point1[0];
+    const y1 = point1[1];
+    const x2 = point2[0];
+    const y2 = point2[1];
+    return [(x2 - x1) * scalar, (y2 - y1) * scalar];
+  },
+
+  addVector(point1, point2) {
+    const x1 = point1[0];
+    const y1 = point1[1];
+    const x2 = point2[0];
+    const y2 = point2[1];
+    return [x1 + x2, y1 + y2];
+  },
+
   slope(point1, point2) {
     const x1 = point1[0];
     const y1 = point1[1];
@@ -362,11 +384,11 @@ class Blaster extends MovingObject {
   constructor(options) {
     super(options);
     this.xPos = options.xPos;
-    this.tubeQuadIdx = options.tubeQuadIdx;
+    this.tubeQuad = options.tubeQuad;
   }
 
   draw(context) {
-    this.drawTubeQuad(context, this.game.tubeQuads[this.tubeQuadIdx]);
+    this.drawTubeQuad(context, this.tubeQuad);
   }
 
   drawTubeQuad(context, tubeQuad) {
@@ -381,9 +403,11 @@ class Blaster extends MovingObject {
   }
 
   fireBullet() {
-    const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
+    const tubeQuad = this.tubeQuad;
     const blasterBullet = new BlasterBullet({
-      pos: tubeQuad[0]
+      game: this.game,
+      pos: Util.midpoint(tubeQuad[0], tubeQuad[1]),
+      tubeQuad: this.tubeQuad
     });
     this.game.add(blasterBullet);
   }
@@ -397,18 +421,25 @@ module.exports = Blaster;
 /***/ (function(module, exports, __webpack_require__) {
 
 const MovingObject = __webpack_require__(5);
+const Util = __webpack_require__(4);
 
 class BlasterBullet extends MovingObject {
   constructor(options) {
     super(options);
     this.pos = options.pos;
+    this.tubeQuad = options.tubeQuad;
+    this.zPos = 0;
   }
 
   draw(context) {
     context.fillStyle = '#ffffff';
     context.beginPath();
+    const posFrom = Util.midpoint(this.tubeQuad[0], this.tubeQuad[1]);
+    const posTo = Util.midpoint(this.tubeQuad[2], this.tubeQuad[3]);
+    const vectorTo = Util.vector(posFrom, posTo, this.zPos / BlasterBullet.MAX_Z_POS);
+    const pos = Util.addVector(posFrom, vectorTo);
     context.arc(
-      this.pos[0], this.pos[1], 3, 0, 2 * Math.PI, true
+      pos[0], pos[1], 3, 0, 2 * Math.PI, true
     );
     context.fill();
   }
@@ -418,10 +449,13 @@ class BlasterBullet extends MovingObject {
       this.pos[0] + 2,
       this.pos[1] + 2,
     ];
+    this.zPos += 5;
   }
 }
 
 module.exports = BlasterBullet;
+
+BlasterBullet.MAX_Z_POS = 120;
 
 
 /***/ })
