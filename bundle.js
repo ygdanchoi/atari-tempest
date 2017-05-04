@@ -575,6 +575,8 @@ class Flipper extends MovingObject {
     this.xPos = options.xPos;
     this.xVel = options.xVel;
     this.zPos = Flipper.MAX_Z_POS;
+    this.wait = 10;
+    this.waiting = 0;
   }
 
   draw(context) {
@@ -589,9 +591,8 @@ class Flipper extends MovingObject {
     const easeFraction = 1 - Math.pow(zFraction - 1, 2);
     const vectorTo = Util.vector(posFrom, posTo, easeFraction);
     const pos = Util.addVector(posFrom, vectorTo);
-    context.arc(
-      pos[0], pos[1], 3 * (1 - easeFraction) + 1, 0, 2 * Math.PI, true
-    );
+    context.font = 'bold 12px Arial';
+    context.fillText(this.xPosInTubeQuad, pos[0], pos[1]);
     context.fill();
   }
 
@@ -599,12 +600,23 @@ class Flipper extends MovingObject {
     if (this.zPos > 0) {
       this.zPos -= 1;
     }
-    this.xPos += this.xVel;
-    const numXPos = this.game.tubeQuads.length * Flipper.NUM_FLIPPER_POSITIONS;
-    if (this.xPos < 0) {
-      this.xPos += numXPos;
-    } else if (this.xPos >= numXPos) {
-      this.xPos -= numXPos;
+    if (this.waiting > 0) {
+      this.waiting -= 1;
+    } else {
+      this.xPos += this.xVel;
+      const numXPos = this.game.tubeQuads.length * Flipper.NUM_FLIPPER_POSITIONS;
+      if (this.xPos < 0) {
+        this.xPos += numXPos;
+      } else if (this.xPos >= numXPos) {
+        this.xPos -= numXPos;
+      }
+      if (this.xPosInTubeQuad === Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2) - 1) {
+        if (this.zPos > 0) {
+          this.waiting = this.wait;
+        } else {
+          this.waiting = Math.floor(this.wait / 2);
+        }
+      }
     }
   }
 }
