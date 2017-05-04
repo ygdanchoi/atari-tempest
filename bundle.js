@@ -93,8 +93,8 @@ class Game {
 
   addBlaster() {
     const blaster = new Blaster({
-      xPos: 0,
-      tubeQuad: this.tubeQuads[0],
+      xPosInTubeQuad: 0,
+      tubeQuadIdx: 0,
       game: this,
     });
 
@@ -151,8 +151,8 @@ class Game {
         const point = [e.offsetX, e.offsetY];
         const boundary = this.tubeQuads[i];
         if (Util.isInside(point, boundary)) {
-          this.blasters[0].xPos = this.xPosInTubeQuad(point, boundary);
-          this.blasters[0].tubeQuad = this.tubeQuads[i];
+          this.blasters[0].xPosInTubeQuad = this.xPosInTubeQuad(point, boundary);
+          this.blasters[0].tubeQuadIdx = i;
         }
       }
     };
@@ -421,13 +421,14 @@ const Util = __webpack_require__(4);
 class Blaster extends MovingObject {
   constructor(options) {
     super(options);
-    this.xPos = options.xPos;
-    this.tubeQuad = options.tubeQuad;
+    this.xPosInTubeQuad = options.xPosInTubeQuad;
+    this.tubeQuadIdx = options.tubeQuadIdx;
     this.firing = false;
   }
 
   draw(context) {
-    this.drawTubeQuad(context, this.tubeQuad);
+    const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
+    this.drawTubeQuad(context, tubeQuad);
     if (this.firing) {
       this.fireBullet();
     }
@@ -449,7 +450,7 @@ class Blaster extends MovingObject {
     if (this.game.blasterBullets.length < 8) {
       const blasterBullet = new BlasterBullet({
         game: this.game,
-        tubeQuad: this.tubeQuad,
+        tubeQuadIdx: this.tubeQuadIdx,
       });
       this.game.add(blasterBullet);
     }
@@ -471,15 +472,16 @@ const Util = __webpack_require__(4);
 class BlasterBullet extends MovingObject {
   constructor(options) {
     super(options);
-    this.tubeQuad = options.tubeQuad;
+    this.tubeQuadIdx = options.tubeQuadIdx;
     this.zPos = 0;
   }
 
   draw(context) {
+    const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx]
     context.fillStyle = '#ffffff';
     context.beginPath();
-    const posFrom = Util.midpoint(this.tubeQuad[0], this.tubeQuad[1]);
-    const posTo = Util.midpoint(this.tubeQuad[2], this.tubeQuad[3]);
+    const posFrom = Util.midpoint(tubeQuad[0], tubeQuad[1]);
+    const posTo = Util.midpoint(tubeQuad[2], tubeQuad[3]);
     const zFraction = this.zPos / BlasterBullet.MAX_Z_POS;
     const easeFraction = 1 - Math.pow(zFraction - 1, 2);
     const vectorTo = Util.vector(posFrom, posTo, easeFraction);
