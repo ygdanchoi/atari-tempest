@@ -641,10 +641,17 @@ class Flipper extends MovingObject {
     const zFraction = this.zPos / Flipper.MAX_Z_POS;
     const easeFraction = 1 - Math.pow(zFraction - 1, 2);
     const vectorTo = Util.vector(posFrom, posTo, easeFraction);
+    const vectorTo0 = Util.vector(tubeQuad[0], tubeQuad[3], easeFraction);
+    const vectorTo1 = Util.vector(tubeQuad[1], tubeQuad[2], easeFraction);
     const pos = Util.addVector(posFrom, vectorTo);
     context.font = 'bold 12px Arial';
     context.fillText(this.xPosInTubeQuad, pos[0], pos[1]);
     context.fill();
+
+    context.strokeStyle = '#ff0000';
+    context.moveTo(...Util.addVector(tubeQuad[0], vectorTo0));
+    context.lineTo(...Util.addVector(tubeQuad[1], vectorTo1));
+    context.stroke();
     if (Math.random() < 0.01) {
       this.fireBullet();
     }
