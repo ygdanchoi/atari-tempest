@@ -86,6 +86,8 @@ class Game {
       this.blasters.push(object);
     } else if (object instanceof BlasterBullet) {
       this.blasterBullets.push(object);
+    } else {
+      throw 'unexpected object';
     }
   }
 
@@ -164,6 +166,14 @@ class Game {
     this.allObjects().forEach((object) => {
       object.move(delta);
     });
+  }
+
+  remove(object) {
+    if (object instanceof BlasterBullet) {
+      this.blasterBullets.splice(this.blasterBullets.indexOf(object), 1);
+    } else {
+      throw 'unexpected object';
+    }
   }
 
   step(delta) {
@@ -367,6 +377,10 @@ class MovingObject {
 
   move(delta) {
   }
+
+  remove() {
+    this.game.remove(this);
+  }
 }
 
 module.exports = MovingObject;
@@ -406,8 +420,7 @@ class Blaster extends MovingObject {
     const tubeQuad = this.tubeQuad;
     const blasterBullet = new BlasterBullet({
       game: this.game,
-      pos: Util.midpoint(tubeQuad[0], tubeQuad[1]),
-      tubeQuad: this.tubeQuad
+      tubeQuad: this.tubeQuad,
     });
     this.game.add(blasterBullet);
   }
@@ -426,7 +439,6 @@ const Util = __webpack_require__(4);
 class BlasterBullet extends MovingObject {
   constructor(options) {
     super(options);
-    this.pos = options.pos;
     this.tubeQuad = options.tubeQuad;
     this.zPos = 0;
   }
@@ -445,11 +457,10 @@ class BlasterBullet extends MovingObject {
   }
 
   move(delta) {
-    this.pos = [
-      this.pos[0] + 2,
-      this.pos[1] + 2,
-    ];
     this.zPos += 5;
+    if (this.zPos > 120) {
+      this.remove();
+    }
   }
 }
 
