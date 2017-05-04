@@ -85,10 +85,6 @@ class Game {
     this.flippers = [];
     this.enemyBullets = [];
     this.enemyExplosions = [];
-
-    this.add(new Flipper({ xVel: 1, xPos: Math.floor(112 * Math.random()), game: this }));
-    this.add(new Flipper({ xVel: -1, xPos: Math.floor(112 * Math.random()), game: this }));
-    this.add(new EnemyBullet({ tubeQuadIdx: Math.floor(16 * Math.random()), zPos: Math.floor(120 * Math.random()), game: this }));
   }
 
   add(object) {
@@ -121,7 +117,7 @@ class Game {
       this.blasterBullets,
       this.flippers,
       this.enemyBullets,
-      this.enemyExplosions,
+      this.enemyExplosions
     );
   }
 
@@ -225,6 +221,13 @@ class Game {
   step(delta) {
     this.checkCollisions();
     this.moveObjects(delta);
+    if (Math.random() < 0.02) {
+      this.add(new Flipper({
+        xVel: Math.random() < 0.5 ? -1 : 1,
+        xPos: Math.floor(112 * Math.random()),
+        game: this
+      }));
+    }
   }
 
 }
@@ -608,6 +611,7 @@ module.exports = BlasterBullet;
 const MovingObject = __webpack_require__(5);
 const BlasterBullet = __webpack_require__(7);
 const Blaster = __webpack_require__(6);
+const EnemyBullet = __webpack_require__(10);
 const EnemyExplosion = __webpack_require__(9);
 const Util = __webpack_require__(4);
 
@@ -617,8 +621,13 @@ class Flipper extends MovingObject {
     this.xPos = options.xPos;
     this.xVel = options.xVel;
     this.zPos = Flipper.MAX_Z_POS;
+    this.xPosInTubeQuad = this.xPos % Flipper.NUM_FLIPPER_POSITIONS;
+    this.tubeQuadIdx = Math.floor(this.xPos / Flipper.NUM_FLIPPER_POSITIONS);
     this.wait = 10;
     this.waiting = 0;
+    if (Math.random() < 0.5) {
+      this.fireBullet();
+    }
   }
 
   draw(context) {
@@ -636,6 +645,20 @@ class Flipper extends MovingObject {
     context.font = 'bold 12px Arial';
     context.fillText(this.xPosInTubeQuad, pos[0], pos[1]);
     context.fill();
+    if (Math.random() < 0.01) {
+      this.fireBullet();
+    }
+  }
+
+  fireBullet() {
+    if (this.game.enemyBullets.length < 3) {
+      const enemyBullet = new EnemyBullet({
+        tubeQuadIdx: this.tubeQuadIdx,
+        zPos: this.zPos,
+        game: this.game,
+      });
+      this.game.add(enemyBullet);
+    }
   }
 
   isCollidedWith(blasterObject) {
