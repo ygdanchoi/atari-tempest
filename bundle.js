@@ -92,12 +92,7 @@ class Game {
   }
 
   addBlaster() {
-    const blaster = new Blaster({
-      xPos: 0,
-      xPosInTubeQuad: 0,
-      tubeQuadIdx: 0,
-      game: this,
-    });
+    const blaster = new Blaster({ game: this });
 
     this.add(blaster);
 
@@ -152,7 +147,7 @@ class Game {
         const point = [e.offsetX, e.offsetY];
         const boundary = this.tubeQuads[i];
         if (Util.isInside(point, boundary)) {
-          this.blasters[0].xPos = Game.NUM_BLASTER_POSITIONS * i + this.xPosInTubeQuad(point, boundary);
+          this.blasters[0].targetXPos = Game.NUM_BLASTER_POSITIONS * i + this.xPosInTubeQuad(point, boundary);
         }
       }
     };
@@ -434,7 +429,8 @@ const Util = __webpack_require__(4);
 class Blaster extends MovingObject {
   constructor(options) {
     super(options);
-    this.xPos = options.xPos;
+    this.xPos = 0;
+    this.targetXPos = 0;
     this.firing = false;
     this.changingXPos = 0;
   }
@@ -444,6 +440,11 @@ class Blaster extends MovingObject {
     this.tubeQuadIdx = Math.floor(this.xPos / Blaster.NUM_BLASTER_POSITIONS);
     const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
     this.drawTubeQuad(context, tubeQuad);
+    if (this.xPos <= this.targetXPos - 7) {
+      this.changingXPos = 7;
+    } else if (this.xPos >= this.targetXPos + 7) {
+      this.changingXPos = -7;
+    }
     if (this.changingXPos !== 0) {
       this.changeXPos(this.changingXPos);
     }
