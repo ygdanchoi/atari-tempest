@@ -440,10 +440,14 @@ class Blaster extends MovingObject {
     this.tubeQuadIdx = Math.floor(this.xPos / Blaster.NUM_BLASTER_POSITIONS);
     const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
     this.drawTubeQuad(context, tubeQuad);
-    if (this.xPos <= this.targetXPos - 7) {
-      this.changingXPos = 7;
-    } else if (this.xPos >= this.targetXPos + 7) {
-      this.changingXPos = -7;
+    console.log(this.xPos, this.targetXPos);
+    if (this.xPos <= this.targetXPos - Blaster.NUM_BLASTER_POSITIONS) {
+      this.changingXPos = Blaster.NUM_BLASTER_POSITIONS;
+    } else if (this.xPos >= this.targetXPos + Blaster.NUM_BLASTER_POSITIONS) {
+      this.changingXPos = -Blaster.NUM_BLASTER_POSITIONS;
+    } else {
+      this.changingXPos = 0;
+      this.xPos = this.targetXPos;
     }
     if (this.changingXPos !== 0) {
       this.changeXPos(this.changingXPos);
