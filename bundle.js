@@ -93,6 +93,7 @@ class Game {
 
   addBlaster() {
     const blaster = new Blaster({
+      xPos: 0,
       xPosInTubeQuad: 0,
       tubeQuadIdx: 0,
       game: this,
@@ -151,8 +152,7 @@ class Game {
         const point = [e.offsetX, e.offsetY];
         const boundary = this.tubeQuads[i];
         if (Util.isInside(point, boundary)) {
-          this.blasters[0].xPosInTubeQuad = this.xPosInTubeQuad(point, boundary);
-          this.blasters[0].tubeQuadIdx = i;
+          this.blasters[0].xPos = this.tubeQuads.length * i + this.xPosInTubeQuad(point, boundary);
         }
       }
     };
@@ -421,12 +421,13 @@ const Util = __webpack_require__(4);
 class Blaster extends MovingObject {
   constructor(options) {
     super(options);
-    this.xPosInTubeQuad = options.xPosInTubeQuad;
-    this.tubeQuadIdx = options.tubeQuadIdx;
+    this.xPos = options.xPos;
     this.firing = false;
   }
 
   draw(context) {
+    this.xPosInTubeQuad = this.xPos % this.game.tubeQuads.length;
+    this.tubeQuadIdx = Math.floor(this.xPos / this.game.tubeQuads.length);
     const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
     this.drawTubeQuad(context, tubeQuad);
     if (this.firing) {
@@ -457,6 +458,7 @@ class Blaster extends MovingObject {
   }
 }
 
+Blaster.MAX_X_POS_IN_TUBE_QUAD = 7;
 Blaster.MAX_NUM_BULLETS = 8;
 
 module.exports = Blaster;
