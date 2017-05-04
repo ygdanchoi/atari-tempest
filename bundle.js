@@ -74,12 +74,10 @@ const Util = __webpack_require__(4);
 const Blaster = __webpack_require__(6);
 
 class Game {
-  constructor(canvasEl) {
+  constructor() {
     this.tubeQuads = [];
     this.blasters = [];
     this.blasterBullets = [];
-    canvasEl.addEventListener('mousemove', this.handleMouseMove(canvasEl.getContext('2d')).bind(this));
-    canvasEl.addEventListener('click', this.step.bind(this));
   }
 
   addBlaster() {
@@ -219,11 +217,13 @@ module.exports = Game;
 /***/ (function(module, exports) {
 
 class GameView {
-  constructor(game, context) {
+  constructor(game, canvasEl) {
     this.game = game;
-    this.context = context;
+    this.context = canvasEl.getContext('2d');
     this.game.draw(this.context);
     this.blaster = this.game.addBlaster();
+
+    canvasEl.addEventListener('mousemove', game.handleMouseMove(this.context));
   }
 
   start() {
@@ -255,8 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   context = canvasEl.getContext('2d');
 
-  const game = new Game(canvasEl);
-  new GameView(game, context).start();
+  const game = new Game();
+  new GameView(game, canvasEl).start();
 });
 
 
@@ -331,12 +331,6 @@ class MovingObject {
   }
 
   draw(context) {
-    context.fillStyle = '#ffffff';
-    context.beginPath();
-    context.arc(
-      this.pos[0], this.pos[1], 3, 0, 2 * Math.PI, true
-    );
-    context.fill();
   }
 
   move(delta) {
