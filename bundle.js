@@ -72,12 +72,21 @@
 
 const Util = __webpack_require__(4);
 const Blaster = __webpack_require__(6);
+const BlasterBullet = __webpack_require__(7);
 
 class Game {
   constructor() {
     this.tubeQuads = [];
     this.blasters = [];
     this.blasterBullets = [];
+  }
+
+  add(object) {
+    if (object instanceof Blaster) {
+      this.blasters.push(object);
+    } else if (object instanceof BlasterBullet) {
+      this.blasterBullets.push(object);
+    }
   }
 
   addBlaster() {
@@ -87,7 +96,7 @@ class Game {
       game: this,
     });
 
-    this.blasters.push(blaster);
+    this.add(blaster);
 
     return blaster;
   }
@@ -347,6 +356,7 @@ module.exports = MovingObject;
 
 const MovingObject = __webpack_require__(5);
 const BlasterBullet = __webpack_require__(7);
+const Util = __webpack_require__(4);
 
 class Blaster extends MovingObject {
   constructor(options) {
@@ -371,12 +381,11 @@ class Blaster extends MovingObject {
   }
 
   fireBullet() {
-    console.log('fire');
     const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
     const blasterBullet = new BlasterBullet({
       pos: tubeQuad[0]
     });
-    this.game.blasterBullets.push(blasterBullet);
+    this.game.add(blasterBullet);
   }
 }
 
