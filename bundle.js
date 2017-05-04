@@ -73,12 +73,16 @@
 const Util = __webpack_require__(4);
 const Blaster = __webpack_require__(6);
 const BlasterBullet = __webpack_require__(7);
+const Flipper = __webpack_require__(8);
 
 class Game {
   constructor() {
     this.tubeQuads = [];
     this.blasters = [];
     this.blasterBullets = [];
+    this.flippers = [];
+
+    this.add(new Flipper({ xVel: 1, xPos: Math.floor(112 * Math.random()), game: this }));
   }
 
   add(object) {
@@ -86,6 +90,8 @@ class Game {
       this.blasters.push(object);
     } else if (object instanceof BlasterBullet) {
       this.blasterBullets.push(object);
+    } else if (object instanceof Flipper) {
+      this.flippers.push(object);
     } else {
       throw 'unexpected object';
     }
@@ -100,7 +106,11 @@ class Game {
   }
 
   allObjects() {
-    return [].concat(this.blasters, this.blasterBullets);
+    return [].concat(
+      this.blasters,
+      this.blasterBullets,
+      this.flippers
+    );
   }
 
   draw(context) {
@@ -166,6 +176,8 @@ class Game {
   remove(object) {
     if (object instanceof BlasterBullet) {
       this.blasterBullets.splice(this.blasterBullets.indexOf(object), 1);
+    } else if (object instanceof Flipper) {
+      this.flippers.splice(this.flippers.indexOf(object), 1);
     } else {
       throw 'unexpected object';
     }
@@ -180,6 +192,7 @@ class Game {
 Game.DIM_X = 512;
 Game.DIM_Y = 450;
 Game.NUM_BLASTER_POSITIONS = 7;
+Game.NUM_FLIPPER_POSITIONS = 7;
 Game.BLUE = '#0000cc';
 Game.YELLOW = '#ffff00';
 Game.TUBE_CIRCLE_OUTER = [
@@ -397,8 +410,6 @@ module.exports = Util;
 /* 5 */
 /***/ (function(module, exports) {
 
-// const Util = require('./util');
-
 class MovingObject {
   constructor(options) {
     this.game = options.game;
@@ -523,7 +534,7 @@ class BlasterBullet extends MovingObject {
   }
 
   draw(context) {
-    const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx]
+    const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
     context.fillStyle = '#ffffff';
     context.beginPath();
     const posFrom = Util.midpoint(tubeQuad[0], tubeQuad[1]);
@@ -546,9 +557,62 @@ class BlasterBullet extends MovingObject {
   }
 }
 
+BlasterBullet.MAX_Z_POS = 120;
+
 module.exports = BlasterBullet;
 
-BlasterBullet.MAX_Z_POS = 120;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const MovingObject = __webpack_require__(5);
+const Util = __webpack_require__(4);
+
+class Flipper extends MovingObject {
+  constructor(options) {
+    super(options);
+    this.xPos = options.xPos;
+    this.xVel = options.xVel;
+    this.zPos = Flipper.MAX_Z_POS;
+  }
+
+  draw(context) {
+    this.xPosInTubeQuad = this.xPos % Flipper.NUM_FLIPPER_POSITIONS;
+    this.tubeQuadIdx = Math.floor(this.xPos / Flipper.NUM_FLIPPER_POSITIONS);
+    const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
+    context.fillStyle = '#ff0000';
+    context.beginPath();
+    const posFrom = Util.midpoint(tubeQuad[0], tubeQuad[1]);
+    const posTo = Util.midpoint(tubeQuad[2], tubeQuad[3]);
+    const zFraction = this.zPos / Flipper.MAX_Z_POS;
+    const easeFraction = 1 - Math.pow(zFraction - 1, 2);
+    const vectorTo = Util.vector(posFrom, posTo, easeFraction);
+    const pos = Util.addVector(posFrom, vectorTo);
+    context.arc(
+      pos[0], pos[1], 3 * (1 - easeFraction) + 1, 0, 2 * Math.PI, true
+    );
+    context.fill();
+  }
+
+  move(delta) {
+    if (this.zPos > 0) {
+      this.zPos -= 1;
+    }
+    this.xPos += this.xVel;
+    const numXPos = this.game.tubeQuads.length * Flipper.NUM_FLIPPER_POSITIONS;
+    if (this.xPos < 0) {
+      this.xPos += numXPos;
+    } else if (this.xPos >= numXPos) {
+      this.xPos -= numXPos;
+    }
+  }
+}
+
+Flipper.NUM_FLIPPER_POSITIONS = 7;
+Flipper.MAX_Z_POS = 120;
+
+module.exports = Flipper;
 
 
 /***/ })
