@@ -68,24 +68,37 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
 const Util = __webpack_require__(4);
+const MovingObject = __webpack_require__(5);
 
 class Game {
   constructor(canvasEl) {
+    const movingObject = new MovingObject({
+      pos: [368, 108],
+      game: this,
+    });
+
     this.tubeQuads = [];
+    this.blasters = [movingObject];
+    this.blasterBullets = [];
     canvasEl.addEventListener('mousemove', this.handleMouseMove(canvasEl.getContext('2d')).bind(this));
+  }
+
+  allObjects() {
+    return [].concat(this.blasters, this.blasterBullets);
   }
 
   draw(context) {
     context.clearRect(0, 0, Game.DIM_X, Game.DIM_Y);
     context.fillStyle = '#000000';
     context.fillRect(0, 0, Game.DIM_X, Game.DIM_Y);
-    context.strokeStyle = Game.BLUE;
     this.defineTubeQuads(Game.TUBE_CIRCLE_OUTER, Game.TUBE_CIRCLE_INNER);
-    this.drawTubeQuads(context);
+    this.drawTubeQuads(context, Game.BLUE);
+    this.allObjects().forEach((object) => {
+      object.draw(context);
+    });
   }
 
   defineTubeQuads(outer, inner) {
@@ -101,7 +114,8 @@ class Game {
     }
   }
 
-  drawTubeQuads(context) {
+  drawTubeQuads(context, color) {
+    context.strokeStyle = color;
     for (let i = 0; i < this.tubeQuads.length; i++) {
       const quadrilateral = this.tubeQuads[i];
       context.beginPath();
@@ -223,7 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   context = canvasEl.getContext('2d');
 
-
   const game = new Game(canvasEl);
   new GameView(game, context);
 });
@@ -286,6 +299,35 @@ const Util = {
 };
 
 module.exports = Util;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+// const Util = require('./util');
+
+class MovingObject {
+  constructor(options) {
+    this.pos = options.pos;
+    this.game = options.game;
+  }
+
+  draw(context) {
+    context.fillStyle = '#ffffff';
+    context.beginPath();
+    context.arc(
+      this.pos[0], this.pos[1], 3, 0, 2 * Math.PI, true
+    );
+    context.fill();
+  }
+
+  move(timeDelta) {
+
+  }
+}
+
+module.exports = MovingObject;
 
 
 /***/ })
