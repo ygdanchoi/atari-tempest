@@ -63,37 +63,20 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-const Game = __webpack_require__(1);
-const GameView = __webpack_require__(2);
-
-document.addEventListener('DOMContentLoaded', () => {
-  const canvasEl = document.getElementsByTagName('canvas')[0];
-  canvasEl.width = Game.DIM_X;
-  canvasEl.height = Game.DIM_Y;
-
-  context = canvasEl.getContext('2d');
-
-
-  const game = new Game(canvasEl);
-  new GameView(game, context);
-});
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
+"use strict";
+const Util = __webpack_require__(4);
 
 class Game {
   constructor(canvasEl) {
     this.tubeQuads = [];
-    canvasEl.addEventListener('mousemove', this.handleClick(canvasEl.getContext('2d')).bind(this));
+    canvasEl.addEventListener('mousemove', this.handleMouseMove(canvasEl.getContext('2d')).bind(this));
   }
 
   draw(context) {
@@ -131,31 +114,20 @@ class Game {
     }
   }
 
-  handleClick(context) {
+  handleMouseMove(context) {
     return (e) => {
       for (let i = 0; i < this.tubeQuads.length; i++) {
-        const point = [e.clientX, e.clientY];
+        const point = [e.offsetX, e.offsetY];
         const boundary = this.tubeQuads[i];
-        if (this.isInside(point, boundary)) {
+        if (Util.isInside(point, boundary)) {
           this.draw(context);
-          this.drawTubeQuad(context, this.tubeQuads[i]);
+          this.drawTubeQuad(context, boundary);
+          console.log(this.xPosInTubeQuad(point, boundary));
           return i;
         }
       }
       return -1;
     };
-  }
-
-  isInside(point, boundary) {
-    let result = false;
-    // http://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
-    for (let i = 0, j = boundary.length - 1; i < boundary.length; j = i++) {
-      if ((boundary[i][1] > point[1]) != (boundary[j][1] > point[1]) &&
-          (point[0] < (boundary[j][0] - boundary[i][0]) * (point[1] - boundary[i][1]) / (boundary[j][1] - boundary[i][1]) + boundary[i][0])) {
-        result = !result;
-      }
-    }
-    return result;
   }
 
   drawTubeQuad(context, tubeQuad) {
@@ -169,10 +141,15 @@ class Game {
     context.stroke();
   }
 
+  xPosInTubeQuad(point, boundary) {
+    return Math.floor(Game.NUM_BLASTER_POSITIONS * Util.xFractionInTubeQuad(point, boundary));
+  }
+
 }
 
 Game.DIM_X = 512;
 Game.DIM_Y = 450;
+Game.NUM_BLASTER_POSITIONS = 7;
 Game.BLUE = '#0000cc';
 Game.YELLOW = '#ffff00';
 Game.TUBE_CIRCLE_OUTER = [
@@ -218,7 +195,7 @@ module.exports = Game;
 
 
 /***/ }),
-/* 2 */
+/* 1 */
 /***/ (function(module, exports) {
 
 class GameView {
@@ -230,6 +207,85 @@ class GameView {
 }
 
 module.exports = GameView;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Game = __webpack_require__(0);
+const GameView = __webpack_require__(1);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const canvasEl = document.getElementsByTagName('canvas')[0];
+  canvasEl.width = Game.DIM_X;
+  canvasEl.height = Game.DIM_Y;
+
+  context = canvasEl.getContext('2d');
+
+
+  const game = new Game(canvasEl);
+  new GameView(game, context);
+});
+
+
+/***/ }),
+/* 3 */,
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Game = __webpack_require__(0);
+
+const Util = {
+  isInside(point, boundary) {
+    let result = false;
+    // http://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
+    for (let i = 0, j = boundary.length - 1; i < boundary.length; j = i++) {
+      if ((boundary[i][1] > point[1]) != (boundary[j][1] > point[1]) &&
+      (point[0] < (boundary[j][0] - boundary[i][0]) * (point[1] - boundary[i][1]) / (boundary[j][1] - boundary[i][1]) + boundary[i][0])) {
+        result = !result;
+      }
+    }
+    return result;
+  },
+
+  distanceBetweenPoints(point1, point2) {
+    const x1 = point1[0];
+    const y1 = point1[1];
+    const x2 = point2[0];
+    const y2 = point2[1];
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  },
+
+  distanceToLine(point0, point1, point2) {
+    const x0 = point0[0];
+    const y0 = point0[1];
+    const x1 = point1[0];
+    const y1 = point1[1];
+    const x2 = point2[0];
+    const y2 = point2[1];
+    const numerator = Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1);
+    const denominator = Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2));
+    return numerator / denominator;
+  },
+
+  xFractionInTubeQuad(point, tubeQuad) {
+    const distBack = Util.distanceToLine(point, tubeQuad[0], tubeQuad[3]);
+    const distForward = Util.distanceToLine(point, tubeQuad[1], tubeQuad[2]);
+    const distTotal = distBack + distForward;
+    return distBack / distTotal;
+  },
+
+  slope(point1, point2) {
+    const x1 = point1[0];
+    const y1 = point1[1];
+    const x2 = point2[0];
+    const y2 = point2[1];
+    return (y2 - y1) / (x2 - x1);
+  },
+};
+
+module.exports = Util;
 
 
 /***/ })
