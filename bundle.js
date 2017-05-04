@@ -76,14 +76,15 @@ const MovingObject = __webpack_require__(5);
 class Game {
   constructor(canvasEl) {
     const movingObject = new MovingObject({
-      pos: [368, 108],
+      pos: [385, 134],
       game: this,
     });
 
     this.tubeQuads = [];
-    this.blasters = [movingObject];
-    this.blasterBullets = [];
+    this.blasters = [];
+    this.blasterBullets = [movingObject];
     canvasEl.addEventListener('mousemove', this.handleMouseMove(canvasEl.getContext('2d')).bind(this));
+    canvasEl.addEventListener('click', this.step.bind(this));
   }
 
   allObjects() {
@@ -159,6 +160,16 @@ class Game {
     return Math.floor(Game.NUM_BLASTER_POSITIONS * Util.xFractionInTubeQuad(point, boundary));
   }
 
+  moveObjects(delta) {
+    this.allObjects().forEach((object) => {
+      object.move(delta);
+    });
+  }
+
+  step(delta) {
+    this.moveObjects(delta);
+  }
+
 }
 
 Game.DIM_X = 512;
@@ -215,7 +226,18 @@ module.exports = Game;
 class GameView {
   constructor(game, context) {
     this.game = game;
-    this.game.draw(context);
+    this.context = context;
+    this.game.draw(this.context);
+  }
+
+  start() {
+    requestAnimationFrame(this.animate.bind(this));
+  }
+
+  animate(time) {
+    this.game.step();
+    this.game.draw(this.context);
+    requestAnimationFrame(this.animate.bind(this));
   }
 
 }
@@ -238,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
   context = canvasEl.getContext('2d');
 
   const game = new Game(canvasEl);
-  new GameView(game, context);
+  new GameView(game, context).start();
 });
 
 
@@ -322,8 +344,12 @@ class MovingObject {
     context.fill();
   }
 
-  move(timeDelta) {
-
+  move(delta) {
+    console.log('move');
+    this.pos = [
+      this.pos[0] += -2,
+      this.pos[1] += 4,
+    ];
   }
 }
 
