@@ -71,18 +71,19 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 const Util = __webpack_require__(4);
-const MovingObject = __webpack_require__(5);
+const Blaster = __webpack_require__(6);
 
 class Game {
   constructor(canvasEl) {
-    const movingObject = new MovingObject({
-      pos: [385, 134],
+    const blaster = new Blaster({
+      xPos: 0,
+      tubeQuadIdx: 0,
       game: this,
     });
 
     this.tubeQuads = [];
-    this.blasters = [];
-    this.blasterBullets = [movingObject];
+    this.blasters = [blaster];
+    this.blasterBullets = [];
     canvasEl.addEventListener('mousemove', this.handleMouseMove(canvasEl.getContext('2d')).bind(this));
     canvasEl.addEventListener('click', this.step.bind(this));
   }
@@ -135,25 +136,13 @@ class Game {
         const point = [e.offsetX, e.offsetY];
         const boundary = this.tubeQuads[i];
         if (Util.isInside(point, boundary)) {
-          this.draw(context);
-          this.drawTubeQuad(context, boundary);
-          console.log(this.xPosInTubeQuad(point, boundary));
+          this.blasters[0].xPos = this.xPosInTubeQuad(point, boundary);
+          this.blasters[0].tubeQuadIdx = i;
           return i;
         }
       }
       return -1;
     };
-  }
-
-  drawTubeQuad(context, tubeQuad) {
-    context.strokeStyle = '#ffff00';
-    context.beginPath();
-    context.moveTo(...tubeQuad[1]);
-    context.lineTo(...tubeQuad[2]);
-    context.moveTo(...tubeQuad[3]);
-    context.lineTo(...tubeQuad[0]);
-    context.closePath();
-    context.stroke();
   }
 
   xPosInTubeQuad(point, boundary) {
@@ -331,7 +320,6 @@ module.exports = Util;
 
 class MovingObject {
   constructor(options) {
-    this.pos = options.pos;
     this.game = options.game;
   }
 
@@ -345,15 +333,43 @@ class MovingObject {
   }
 
   move(delta) {
-    console.log('move');
-    this.pos = [
-      this.pos[0] += -2,
-      this.pos[1] += 4,
-    ];
   }
 }
 
 module.exports = MovingObject;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const MovingObject = __webpack_require__(5);
+
+class Blaster extends MovingObject {
+  constructor(options) {
+    super(options);
+    this.xPos = options.xPos;
+    this.tubeQuadIdx = options.tubeQuadIdx;
+  }
+
+  draw(context) {
+    this.drawTubeQuad(context, this.game.tubeQuads[this.tubeQuadIdx]);
+  }
+
+  drawTubeQuad(context, tubeQuad) {
+    console.log(this.xPos);
+    context.strokeStyle = '#ffff00';
+    context.beginPath();
+    context.moveTo(...tubeQuad[1]);
+    context.lineTo(...tubeQuad[2]);
+    context.moveTo(...tubeQuad[3]);
+    context.lineTo(...tubeQuad[0]);
+    context.closePath();
+    context.stroke();
+  }
+}
+
+module.exports = Blaster;
 
 
 /***/ })
