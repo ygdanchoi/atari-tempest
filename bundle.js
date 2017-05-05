@@ -730,7 +730,7 @@ class Flipper extends MovingObject {
     this.tubeQuadIdx = Math.floor(this.xPos / Flipper.NUM_FLIPPER_POSITIONS);
     this.wait = 10;
     this.waiting = 0;
-    if (!this.game.died && Math.random() < 0.5) {
+    if (Math.random() < 0.5) {
       this.fireBullet();
     }
   }
@@ -749,9 +749,6 @@ class Flipper extends MovingObject {
     let pos1 = Util.addVector(tubeQuad[1], vectorTo1);
     context.fill();
     const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
-    if (this.xVel > 0) {
-
-    }
     let orthogonalVector;
     if (this.xPosInTubeQuad > midFlip) {
       orthogonalVector = Util.orthogonalUnitVector(pos0, pos1, 15 * (1 - 0.9 * easeFraction));
@@ -777,7 +774,7 @@ class Flipper extends MovingObject {
     context.lineTo(...pos0Crease);
     context.closePath();
     context.stroke();
-    if (Math.random() < 0.01) {
+    if (!this.game.died && Math.random() < 0.01) {
       this.fireBullet();
     }
   }
@@ -824,24 +821,31 @@ class Flipper extends MovingObject {
   }
 
   move(delta) {
-    if (this.zPos > 0) {
-      this.zPos -= 1;
-    }
-    if (this.waiting > 0) {
-      this.waiting -= 1;
-    } else {
-      this.xPos += this.xVel;
-      const numXPos = this.game.tubeQuads.length * Flipper.NUM_FLIPPER_POSITIONS;
-      if (this.xPos < 0) {
-        this.xPos += numXPos;
-      } else if (this.xPos >= numXPos) {
-        this.xPos -= numXPos;
+    if (this.game.died) {
+      this.zPos += 10;
+      if (this.zPos > Flipper.MAX_Z_POS) {
+        this.remove();
       }
-      if (this.xPosInTubeQuad + this.xVel === Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2)) {
-        if (this.zPos > 0) {
-          this.waiting = this.wait;
-        } else {
-          this.waiting = Math.floor(this.wait / 2);
+    } else {
+      if (this.zPos > 0) {
+        this.zPos -= 1;
+      }
+      if (this.waiting > 0) {
+        this.waiting -= 1;
+      } else {
+        this.xPos += this.xVel;
+        const numXPos = this.game.tubeQuads.length * Flipper.NUM_FLIPPER_POSITIONS;
+        if (this.xPos < 0) {
+          this.xPos += numXPos;
+        } else if (this.xPos >= numXPos) {
+          this.xPos -= numXPos;
+        }
+        if (this.xPosInTubeQuad + this.xVel === Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2)) {
+          if (this.zPos > 0) {
+            this.waiting = this.wait;
+          } else {
+            this.waiting = Math.floor(this.wait / 2);
+          }
         }
       }
     }
