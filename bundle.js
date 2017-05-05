@@ -80,6 +80,7 @@ const EnemyExplosion = __webpack_require__(9);
 
 class Game {
   constructor() {
+    this.blaster = new Blaster({ game: this });
     this.tubeQuads = [];
     this.blasters = [];
     this.blasterBullets = [];
@@ -115,11 +116,9 @@ class Game {
   }
 
   addBlaster() {
-    const blaster = new Blaster({ game: this });
-
-    this.add(blaster);
-
-    return blaster;
+    this.blaster.xPos = 0;
+    this.add(this.blaster);
+    return this.blaster;
   }
 
   allObjects() {
@@ -255,6 +254,10 @@ class Game {
         xPos: Math.floor(112 * Math.random()),
         game: this
       }));
+    }
+    if (this.died && this.allObjects().length === 0) {
+      this.died = false;
+      this.addBlaster();
     }
   }
 
