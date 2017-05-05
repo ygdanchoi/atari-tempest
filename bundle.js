@@ -116,7 +116,6 @@ class Game {
   }
 
   addBlaster() {
-    this.blaster.xPos = 0;
     this.add(this.blaster);
     return this.blaster;
   }
@@ -1026,9 +1025,9 @@ class BlasterExplosion extends MovingObject {
     for (let i = 0; i < BlasterExplosion.COORDS.length - 1; i += 2) {
       context.beginPath();
       const flip = this.shrinking ? 1 : -1;
-      context.strokeStyle = colors[(i / 2 + this.size * flip) % 3];
-      for (var j = 1; j <= this.size; j++) {
-        const scalar = j / BlasterExplosion.MAX_SIZE;
+      context.strokeStyle = colors[(BlasterExplosion.MAX_SIZE + i / 2 + this.size * flip) % 3];
+      for (var j = 1; j <= this.size; j += 2) {
+        const scalar = j / (BlasterExplosion.MAX_SIZE - 1);
         context.moveTo(...Util.addVectorScaled(pos, BlasterExplosion.COORDS[i], scalar));
         context.lineTo(...Util.addVectorScaled(pos, BlasterExplosion.COORDS[i + 1], scalar));
         context.lineTo(...Util.addVectorScaled(pos, BlasterExplosion.COORDS[i + 2], scalar));
@@ -1051,7 +1050,7 @@ class BlasterExplosion extends MovingObject {
   }
 }
 
-BlasterExplosion.MAX_SIZE = 6;
+BlasterExplosion.MAX_SIZE = 12;
 BlasterExplosion.WHITE = '#ffffff';
 BlasterExplosion.YELLOW = '#ffff00';
 BlasterExplosion.RED = '#ff0000';
