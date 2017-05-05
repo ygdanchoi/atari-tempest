@@ -459,7 +459,7 @@ const Util = {
     const y2 = point2[1];
     const x = (x2 - x1) / Util.distanceBetweenPoints(point1, point2) * scalar;
     const y = (y2 - y1) / Util.distanceBetweenPoints(point1, point2) * scalar;
-    return [-y, x];
+    return [y, -x];
   },
 
   addVector(point1, point2) {
@@ -715,22 +715,35 @@ class Flipper extends MovingObject {
     const vectorTo1 = Util.vector(tubeQuad[1], tubeQuad[2], easeFraction);
     let pos0 = Util.addVector(tubeQuad[0], vectorTo0);
     let pos1 = Util.addVector(tubeQuad[1], vectorTo1);
-    let orthogonalVector = Util.orthogonalUnitVector(pos0, pos1, 10 * (1 - easeFraction));
     context.fill();
     const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
-    if (this.xPosInTubeQuad > midFlip) {
-      pos0 = Util.rotateAroundPoint(pos0, pos1, - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
-      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
-    } else {
-      pos1 = Util.rotateAroundPoint(pos1, pos0, - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
-      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+    if (this.xVel > 0) {
+
     }
-    const orthogonalPoint = Util.addVector(Util.midpoint(pos0, pos1), orthogonalVector, 1);
+    let orthogonalVector;
+    if (this.xPosInTubeQuad > midFlip) {
+      orthogonalVector = Util.orthogonalUnitVector(pos0, pos1, 15 * (1 - 0.9 * easeFraction));
+      pos0 = Util.rotateAroundPoint(pos0, pos1, -Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], -Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+    } else {
+      orthogonalVector = Util.orthogonalUnitVector(pos0, pos1, -15 * (1 - 0.9 * easeFraction));
+      pos1 = Util.rotateAroundPoint(pos1, pos0, -Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], -Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+    }
+    const halfOrthogonalVector = Util.vector([0, 0], orthogonalVector, 0.5);
+    const pos0Inner = Util.addVector(Util.weightedMidpoint(pos0, pos1, 0.1), orthogonalVector);
+    const pos0Crease = Util.addVector(Util.weightedMidpoint(pos0, pos1, 0.2), halfOrthogonalVector);
+    const pos1Crease = Util.addVector(Util.weightedMidpoint(pos0, pos1, 0.8), halfOrthogonalVector);
+    const pos1Inner = Util.addVector(Util.weightedMidpoint(pos0, pos1, 0.9), orthogonalVector);
 
     context.strokeStyle = '#ff0000';
     context.moveTo(...pos0);
-    context.lineTo(...orthogonalPoint);
+    context.lineTo(...pos1Inner);
+    context.lineTo(...pos1Crease);
     context.lineTo(...pos1);
+    context.lineTo(...pos0Inner);
+    context.lineTo(...pos0Crease);
+    context.closePath();
     context.stroke();
     if (Math.random() < 0.01) {
       this.fireBullet();
