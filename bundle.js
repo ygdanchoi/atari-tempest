@@ -452,6 +452,16 @@ const Util = {
     return [(x2 - x1) / distance * scalar, (y2 - y1) / distance * scalar];
   },
 
+  orthogonalUnitVector(point1, point2, scalar) {
+    const x1 = point1[0];
+    const y1 = point1[1];
+    const x2 = point2[0];
+    const y2 = point2[1];
+    const x = (x2 - x1) / Util.distanceBetweenPoints(point1, point2) * scalar;
+    const y = (y2 - y1) / Util.distanceBetweenPoints(point1, point2) * scalar;
+    return [-y, x];
+  },
+
   addVector(point1, point2) {
     const x1 = point1[0];
     const y1 = point1[1];
@@ -705,16 +715,21 @@ class Flipper extends MovingObject {
     const vectorTo1 = Util.vector(tubeQuad[1], tubeQuad[2], easeFraction);
     let pos0 = Util.addVector(tubeQuad[0], vectorTo0);
     let pos1 = Util.addVector(tubeQuad[1], vectorTo1);
+    let orthogonalVector = Util.orthogonalUnitVector(pos0, pos1, 10 * (1 - easeFraction));
     context.fill();
     const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
     if (this.xPosInTubeQuad > midFlip) {
       pos0 = Util.rotateAroundPoint(pos0, pos1, - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
     } else {
       pos1 = Util.rotateAroundPoint(pos1, pos0, - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], - Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
     }
+    const orthogonalPoint = Util.addVector(Util.midpoint(pos0, pos1), orthogonalVector, 1);
 
     context.strokeStyle = '#ff0000';
     context.moveTo(...pos0);
+    context.lineTo(...orthogonalPoint);
     context.lineTo(...pos1);
     context.stroke();
     if (Math.random() < 0.01) {
