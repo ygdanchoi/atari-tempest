@@ -809,7 +809,7 @@ class Game {
         this.lives -= 1;
         this.addBlaster();
       } else {
-        
+
       }
     }
 
@@ -819,6 +819,7 @@ class Game {
       Array(this.outerEnemies())
     );
     if (!this.died && allEnemies.length === 0) {
+      this.blasterBullets = [];
       this.enemyBullets = [];
       this.level += 1;
       this.maxNumEnemies = Math.ceil(Math.pow(Math.log(this.level), 2));
