@@ -550,7 +550,9 @@ class Game {
     this.enemyBullets = [];
     this.enemyExplosions = [];
     this.died = false;
-    this.maxNumEnemies = 4;
+    this.maxNumEnemyBullets = 1;
+    this.maxNumEnemies = 2;
+    this.flipperWait = 10;
     this.lives = 2;
     this.score = 0;
     this.level = 1;
@@ -559,20 +561,7 @@ class Game {
     this.innerEnemyQueue = [];
     this.outerEnemyQueue = Array(this.tubeQuads.length).fill(null);
 
-    this.queueEnemies(
-      'flipper',
-      'flipper',
-      'flipper',
-      'flipper',
-      'flipper',
-      'flipper',
-      'flipper',
-      'flipper',
-      'flipper',
-      'flipper',
-      'flipper',
-      'flipper'
-    );
+    this.queueEnemies(...Array(4).fill('flipper'));
   }
 
   add(object) {
@@ -617,6 +606,16 @@ class Game {
       this.enemyBullets,
       this.enemyExplosions
     );
+  }
+
+  outerEnemies() {
+    let outerEnemies = 0;
+    for (let i = 0; i < this.outerEnemyQueue.length; i++) {
+      if (this.outerEnemyQueue[i] !== null) {
+        outerEnemies += 1;
+      }
+    }
+    return outerEnemies;
   }
 
   checkCollisions() {
@@ -684,13 +683,7 @@ class Game {
   }
 
   drawInnerEnemyQueue(context) {
-    let outerEnemies = 0;
-    for (let i = 0; i < this.outerEnemyQueue.length; i++) {
-      if (this.outerEnemyQueue[i] !== null) {
-        outerEnemies += 1;
-      }
-    }
-    if (this.innerEnemyQueue.length > 0 && outerEnemies < this.maxNumEnemies && this.outerEnemyQueue[this.innerEnemyQueue[0].tubeQuadIdx] === null && Math.random() < 0.1) {
+    if (this.innerEnemyQueue.length > 0 && this.outerEnemies() < this.maxNumEnemies && this.outerEnemyQueue[this.innerEnemyQueue[0].tubeQuadIdx] === null && Math.random() < 0.5) {
       this.outerEnemyQueue[this.innerEnemyQueue[0].tubeQuadIdx] = this.innerEnemyQueue.shift().enemyType;
     }
 
@@ -814,6 +807,23 @@ class Game {
       this.died = false;
       this.lives -= 1;
       this.addBlaster();
+    }
+
+    const allEnemies = [].concat(
+      this.flippers,
+      this.innerEnemyQueue,
+      Array(this.outerEnemies())
+    );
+    if (!this.died && allEnemies.length === 0) {
+      this.level += 1;
+      if (this.maxNumEnemies < 6) {
+        this.maxNumEnemies += 1;
+      }
+      this.maxNumEnemyBullets += 1;
+      if (this.flipperWait > 2) {
+        this.flipperWait -= 1;
+      }
+      this.queueEnemies(...Array(this.level * 2).fill('flipper'));
     }
   }
 
@@ -1050,7 +1060,7 @@ class Flipper extends MovingObject {
     this.zPos = Flipper.MAX_Z_POS;
     this.xPosInTubeQuad = this.xPos % Flipper.NUM_FLIPPER_POSITIONS;
     this.tubeQuadIdx = Math.floor(this.xPos / Flipper.NUM_FLIPPER_POSITIONS);
-    this.wait = 10;
+    this.wait = this.game.flipperWait;
     this.waiting = 0;
     if (Math.random() < 0.5) {
       this.fireBullet();
@@ -1096,13 +1106,13 @@ class Flipper extends MovingObject {
     context.lineTo(...pos0Crease);
     context.closePath();
     context.stroke();
-    if (!this.game.died && Math.random() < 0.01) {
+    if (!this.game.died && Math.random() < 0.01 * this.game.maxNumEnemyBullets) {
       this.fireBullet();
     }
   }
 
   fireBullet() {
-    if (this.game.enemyBullets.length < 3) {
+    if (this.game.enemyBullets.length < this.game.maxNumEnemyBullets) {
       const enemyBullet = new EnemyBullet({
         tubeQuadIdx: this.tubeQuadIdx,
         zPos: this.zPos,
@@ -1133,6 +1143,7 @@ class Flipper extends MovingObject {
         zPos: this.zPos,
         game: this.game
       }));
+      this.game.score += 150;
     } else if (blasterObject instanceof Blaster) {
       blasterObject.remove();
       this.game.add(new BlasterExplosion({
