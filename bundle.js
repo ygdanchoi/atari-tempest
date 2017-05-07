@@ -575,9 +575,20 @@ const EnemyExplosion = __webpack_require__(5);
 class Game {
   constructor() {
     this.blaster = new Blaster({ game: this });
+    this.start();
+    this.over = true;
+
+    this.blasterMoveSound = new Audio('ogg/blasterMove.ogg');
+    this.blasterBulletSound = new Audio('ogg/blasterBullet.ogg');
+    this.blasterExplosionSound = new Audio('ogg/blasterExplosion.ogg');
+    this.enemyBulletSound = new Audio('ogg/enemyBullet.ogg');
+    this.enemyExplosionSound = new Audio('ogg/enemyExplosion.ogg');
+  }
+
+  start() {
     this.currentTubeIdx = 0;
     this.tubeQuads = [];
-    this.blasters = [];
+    this.blasters = [this.blaster];
     this.blasterBullets = [];
     this.blasterExplosions = [];
     this.flippers = [];
@@ -597,12 +608,6 @@ class Game {
     this.outerEnemyQueue = Array(this.tubeQuads.length).fill(null);
 
     this.queueEnemies(...Array(4).fill('flipper'));
-
-    this.blasterMoveSound = new Audio('ogg/blasterMove.ogg');
-    this.blasterBulletSound = new Audio('ogg/blasterBullet.ogg');
-    this.blasterExplosionSound = new Audio('ogg/blasterExplosion.ogg');
-    this.enemyBulletSound = new Audio('ogg/enemyBullet.ogg');
-    this.enemyExplosionSound = new Audio('ogg/enemyExplosion.ogg');
   }
 
   add(object) {
@@ -631,11 +636,6 @@ class Game {
         zPos: Math.random(),
       });
     }
-  }
-
-  addBlaster() {
-    this.add(this.blaster);
-    return this.blaster;
   }
 
   allObjects() {
@@ -681,7 +681,7 @@ class Game {
 
   draw(context) {
     context.clearRect(0, 0, Game.DIM_X, Game.DIM_Y);
-    context.fillStyle = '#000000';
+    context.fillStyle = Game.BLACK;
     context.fillRect(0, 0, Game.DIM_X, Game.DIM_Y);
     this.drawLives(context);
     this.drawScore(context);
@@ -1016,9 +1016,9 @@ class Game {
       if (this.lives > 0) {
         this.died = false;
         this.lives -= 1;
-        this.addBlaster();
+        this.blasters = [this.blaster];
       } else {
-
+        this.over = true;
       }
     }
 
@@ -1053,6 +1053,7 @@ Game.DIM_X = 512;
 Game.DIM_Y = 450;
 Game.NUM_BLASTER_POSITIONS = 7;
 Game.NUM_FLIPPER_POSITIONS = 7;
+Game.BLACK = '#000000';
 Game.BLUE = '#0000cc';
 Game.YELLOW = '#ffff00';
 Game.RED = '#ff0000';
@@ -1426,6 +1427,7 @@ Game.TUBE_SHAPES = [
   Game.TUBE_PEANUT,
   Game.TUBE_CLOVER,
   Game.TUBE_CELTIC,
+  Game.TUBE_HEART,
 ];
 
 module.exports = Game;
@@ -1524,12 +1526,13 @@ class GameView {
   constructor(game, canvasEl) {
     this.game = game;
     this.context = canvasEl.getContext('2d');
-    this.game.draw(this.context);
-    this.blaster = this.game.addBlaster();
+    this.blaster = this.game.blaster;
     this.bindHandlers(canvasEl);
+    this.drawSplashScreen(this.context);
   }
 
   bindHandlers(canvasEl) {
+    canvasEl.addEventListener('click', this.start.bind(this));
     canvasEl.addEventListener('mousemove', this.game.handleMouseMove(this.context));
     canvasEl.addEventListener('mousedown', () => {
       this.blaster.firing = true;
@@ -1567,18 +1570,39 @@ class GameView {
   }
 
   start() {
-    // requestAnimationFrame(this.animate.bind(this));
-    setTimeout(this.animate.bind(this), 33); // 30 fps
+    if (this.game.over === true) {
+      this.game.over = false;
+      this.game.start();
+      setTimeout(this.animate.bind(this), 33); // 30 fps
+    }
   }
 
   animate(time) {
     this.game.step();
     this.game.draw(this.context);
-    // requestAnimationFrame(this.animate.bind(this));
-    setTimeout(this.animate.bind(this), 33); // 30 fps
+    if (!this.game.over) {
+      setTimeout(this.animate.bind(this), 33); // 30 fps
+    } else {
+      this.drawSplashScreen(this.context);
+    }
+  }
+
+  drawSplashScreen(context) {
+    context.clearRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
+    context.fillStyle = GameView.BLACK;
+    context.fillRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
+    context.fillStyle = GameView.RED;
+    context.font="22px Arial";
+    context.fillText('CLICK TO SHOOT', 22, 22);
+    context.stroke();
   }
 
 }
+
+GameView.DIM_X = 512;
+GameView.DIM_Y = 450;
+GameView.BLACK = '#000000';
+GameView.RED = '#ff0000';
 
 module.exports = GameView;
 
@@ -1598,7 +1622,7 @@ document.addEventListener('DOMContentLoaded', () => {
   context = canvasEl.getContext('2d');
 
   const game = new Game();
-  new GameView(game, canvasEl).start();
+  new GameView(game, canvasEl);
 });
 
 
