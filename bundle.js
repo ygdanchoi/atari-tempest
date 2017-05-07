@@ -559,6 +559,7 @@ const EnemyExplosion = __webpack_require__(5);
 class Game {
   constructor() {
     this.blaster = new Blaster({ game: this });
+    this.currentTubeIdx = 0;
     this.tubeQuads = [];
     this.blasters = [];
     this.blasterBullets = [];
@@ -575,7 +576,7 @@ class Game {
     this.score = 0;
     this.level = 1;
 
-    this.defineTubeQuads(Game.TUBE_PEANUT);
+    this.defineTubeQuads(Game.TUBE_CIRCLE);
     this.innerEnemyQueue = [];
     this.outerEnemyQueue = Array(this.tubeQuads.length).fill(null);
 
@@ -844,7 +845,11 @@ class Game {
       Array(this.outerEnemies())
     );
     if (!this.died && allEnemies.length === 0) {
-      const tubeShapeIdx = Math.floor(Game.TUBE_SHAPES.length * Math.random());
+      let tubeShapeIdx = Math.floor(Game.TUBE_SHAPES.length * Math.random());
+      while (tubeShapeIdx === this.currentTubeIdx) {
+        tubeShapeIdx = Math.floor(Game.TUBE_SHAPES.length * Math.random());
+      }
+      this.currentTubeIdx = tubeShapeIdx;
       this.defineTubeQuads(Game.TUBE_SHAPES[tubeShapeIdx]);
       this.blasterBullets = [];
       this.enemyBullets = [];
@@ -1069,12 +1074,174 @@ Game.TUBE_PEANUT = [
     [252, 247],
   ]
 ];
+Game.TUBE_TRIANGLE = [
+  [
+    [256, 60],
+    [288, 123],
+    [318, 188],
+    [350, 252],
+    [383, 316],
+    [416, 381],
+    [361, 381],
+    [310, 381],
+    [256, 381],
+    [201, 381],
+    [148, 381],
+    [95, 381],
+    [128, 316],
+    [158, 252],
+    [190, 188],
+    [223, 123],
+    [256, 60],
+  ],
+  [
+    [256, 256],
+    [260, 264],
+    [265, 274],
+    [270, 284],
+    [275, 294],
+    [280, 303],
+    [271, 303],
+    [264, 303],
+    [256, 303],
+    [247, 303],
+    [239, 303],
+    [231, 303],
+    [236, 294],
+    [241, 284],
+    [246, 274],
+    [251, 264],
+    [256, 256],
+  ]
+];
+Game.TUBE_CLOVER = [
+  [
+    [256, 164],
+    [295, 82],
+    [393, 96],
+    [407, 188],
+    [324, 234],
+    [407, 280],
+    [393, 372],
+    [295, 386],
+    [256, 304],
+    [216, 386],
+    [118, 372],
+    [104, 280],
+    [187, 234],
+    [104, 188],
+    [118, 96],
+    [216, 82],
+    [256, 164],
+  ],
+  [
+    [256, 253],
+    [261, 240],
+    [276, 242],
+    [278, 256],
+    [266, 264],
+    [278, 270],
+    [276, 284],
+    [261, 286],
+    [256, 273],
+    [250, 286],
+    [235, 284],
+    [233, 270],
+    [245, 264],
+    [233, 256],
+    [235, 242],
+    [250, 240],
+    [256, 253],
+  ]
+];
+Game.TUBE_CELTIC = [
+  [
+    [227, 60],
+    [284, 60],
+    [301, 121],
+    [347, 170],
+    [416, 189],
+    [416, 252],
+    [347, 271],
+    [301, 319],
+    [284, 381],
+    [227, 381],
+    [210, 319],
+    [164, 271],
+    [95, 252],
+    [95, 189],
+    [164, 170],
+    [210, 121],
+    [227, 60],
+  ],
+  [
+    [251, 255],
+    [260, 255],
+    [262, 264],
+    [269, 271],
+    [280, 274],
+    [280, 284],
+    [269, 286],
+    [262, 294],
+    [260, 303],
+    [251, 303],
+    [249, 294],
+    [242, 286],
+    [231, 284],
+    [231, 274],
+    [242, 271],
+    [249, 264],
+    [251, 255],
+  ]
+];
+Game.TUBE_HEART = [
+  [
+    [256, 217],
+    [265, 140],
+    [307, 70],
+    [385, 76],
+    [416, 147],
+    [416, 228],
+    [393, 301],
+    [336, 357],
+    [256, 380],
+    [175, 357],
+    [118, 301],
+    [95, 228],
+    [95, 147],
+    [126, 76],
+    [204, 70],
+    [246, 140],
+    [256, 217]
+  ],
+  [
+    [256, 336],
+    [257, 325],
+    [263, 314],
+    [275, 314],
+    [280, 325],
+    [280, 338],
+    [276, 349],
+    [268, 357],
+    [256, 360],
+    [243, 357],
+    [235, 349],
+    [231, 338],
+    [231, 325],
+    [236, 314],
+    [248, 314],
+    [255, 325],
+    [256, 336],
+  ]
+];
 Game.TUBE_SHAPES = [
   Game.TUBE_CIRCLE,
   Game.TUBE_SQUARE,
   Game.TUBE_STARBURST,
   Game.TUBE_CROSS,
   Game.TUBE_PEANUT,
+  Game.TUBE_CLOVER,
+  Game.TUBE_CELTIC,
 ];
 
 module.exports = Game;
