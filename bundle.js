@@ -228,6 +228,8 @@ class BlasterBullet extends MovingObject {
     super(options);
     this.tubeQuadIdx = options.tubeQuadIdx;
     this.zPos = 0;
+    this.game.blasterBulletSound.currentTime = 0.001;
+    this.game.blasterBulletSound.play();
   }
 
   draw(context) {
@@ -301,9 +303,14 @@ class Blaster extends MovingObject {
           this.changingXPos = Blaster.NUM_BLASTER_POSITIONS;
         }
       } else {
+        const oldXPos = this.xPos;
         this.changingXPos = 0;
         this.xPos = this.targetXPos;
         this.targetXPos = null;
+        if (Math.floor(oldXPos / Blaster.NUM_BLASTER_POSITIONS) !== Math.floor(this.xPos / Blaster.NUM_BLASTER_POSITIONS)) {
+          this.game.blasterMoveSound.currentTime = 0;
+          this.game.blasterMoveSound.play();
+        }
       }
     }
     if (this.changingXPos !== 0) {
@@ -370,12 +377,17 @@ class Blaster extends MovingObject {
   }
 
   changeXPos(increment) {
+    const oldXPos = this.xPos;
     this.xPos += increment;
     const numXPos = this.game.tubeQuads.length * Blaster.NUM_BLASTER_POSITIONS;
     if (this.xPos < 0) {
       this.xPos += numXPos;
     } else if (this.xPos >= numXPos) {
       this.xPos -= numXPos;
+    }
+    if (Math.floor(oldXPos / Blaster.NUM_BLASTER_POSITIONS) !== Math.floor(this.xPos / Blaster.NUM_BLASTER_POSITIONS)) {
+      this.game.blasterMoveSound.currentTime = 0;
+      this.game.blasterMoveSound.play();
     }
   }
 }
@@ -401,6 +413,8 @@ class BlasterExplosion extends MovingObject {
     this.tubeQuadIdx = options.tubeQuadIdx;
     this.size = 1;
     this.shinking = false;
+    this.game.blasterExplosionSound.currentTime = 0;
+    this.game.blasterExplosionSound.play();
   }
 
   draw(context) {
@@ -490,6 +504,8 @@ class EnemyExplosion extends MovingObject {
     this.tubeQuadIdx = options.tubeQuadIdx;
     this.zPos = options.zPos;
     this.size = 0.25;
+    this.game.enemyExplosionSound.currentTime = 0;
+    this.game.enemyExplosionSound.play();
   }
 
   draw(context) {
@@ -581,6 +597,12 @@ class Game {
     this.outerEnemyQueue = Array(this.tubeQuads.length).fill(null);
 
     this.queueEnemies(...Array(4).fill('flipper'));
+
+    this.blasterMoveSound = new Audio('ogg/blasterMove.ogg');
+    this.blasterBulletSound = new Audio('ogg/blasterBullet.ogg');
+    this.blasterExplosionSound = new Audio('ogg/blasterExplosion.ogg');
+    this.enemyBulletSound = new Audio('ogg/enemyBullet.ogg');
+    this.enemyExplosionSound = new Audio('ogg/enemyExplosion.ogg');
   }
 
   add(object) {
@@ -1264,6 +1286,8 @@ class EnemyBullet extends MovingObject {
     this.tubeQuadIdx = options.tubeQuadIdx;
     this.zPos = options.zPos;
     this.zVel = this.game.enemyBulletZVel;
+    this.game.enemyBulletSound.currentTime = 0;
+    this.game.enemyBulletSound.play();
   }
 
   draw(context) {
@@ -1380,14 +1404,14 @@ class GameView {
 
   start() {
     // requestAnimationFrame(this.animate.bind(this));
-    setTimeout(this.animate.bind(this), 40); // 25 fps
+    setTimeout(this.animate.bind(this), 33); // 30 fps
   }
 
   animate(time) {
     this.game.step();
     this.game.draw(this.context);
     // requestAnimationFrame(this.animate.bind(this));
-    setTimeout(this.animate.bind(this), 40); // 25 fps
+    setTimeout(this.animate.bind(this), 33); // 30 fps
   }
 
 }
