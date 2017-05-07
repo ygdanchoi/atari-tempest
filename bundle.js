@@ -1593,10 +1593,12 @@ class GameView {
     context.clearRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
     context.fillStyle = GameView.BLACK;
     context.fillRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
-    const clickToShoot = 'CLICK TO SHOOT';
-    for (let i = 0; i < clickToShoot.length; i++) {
+    this.game.drawScore(context);
+    this.game.drawLevel(context);
+    const clickToStart = 'CLICK TO START';
+    for (let i = 0; i < clickToStart.length; i++) {
       const pos = [181 + 11 * i, 193];
-      this.drawChar(clickToShoot[i], pos, GameView.RED, context);
+      this.drawChar(clickToStart[i], pos, GameView.RED, context);
     }
   }
 
@@ -1666,6 +1668,23 @@ class GameView {
         context.moveTo(...Util.addVector(pos, points.midL));
         context.lineTo(...Util.addVector(pos, points.midR));
         context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'A':
+        context.moveTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case 'R':
+        context.moveTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.midL));
         context.lineTo(...Util.addVector(pos, points.btmR));
         break;
       default:
