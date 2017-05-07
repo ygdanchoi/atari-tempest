@@ -1286,8 +1286,10 @@ class EnemyBullet extends MovingObject {
     this.tubeQuadIdx = options.tubeQuadIdx;
     this.zPos = options.zPos;
     this.zVel = this.game.enemyBulletZVel;
-    this.game.enemyBulletSound.currentTime = 0;
-    this.game.enemyBulletSound.play();
+    if (this.zPos > 0) {
+      this.game.enemyBulletSound.currentTime = 0;
+      this.game.enemyBulletSound.play();
+    }
   }
 
   draw(context) {
