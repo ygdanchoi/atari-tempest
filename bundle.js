@@ -724,8 +724,8 @@ class Game {
 
   drawLevel(context) {
     const level = `LEVEL ${this.level}`;
-    for (var i = 0; i < level.length; i++) {
-      const pos = [271 - 10 * i, 32];
+    for (let i = 0; i < level.length; i++) {
+      const pos = [271 - 11 * i, 32];
       this.drawNum(level[level.length - 1 - i], pos, 'small', Game.BLUE, context);
     }
   }
@@ -744,14 +744,14 @@ class Game {
     } else if (size === 'small') {
       points = {
         topL: [0, 0],
-        topC: [3, 0],
-        topR: [6, 0],
+        topC: [4, 0],
+        topR: [8, 0],
         midL: [0, 6],
-        midC: [3, 6],
-        midR: [6, 6],
+        midC: [4, 6],
+        midR: [8, 6],
         btmL: [0, 11],
-        btmC: [3, 11],
-        btmR: [6, 11],
+        btmC: [4, 11],
+        btmR: [8, 11],
       };
     }
     context.strokeStyle = color;
@@ -1520,7 +1520,9 @@ module.exports = EnemyBullet;
 
 /***/ }),
 /* 8 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+const Util = __webpack_require__(0);
 
 class GameView {
   constructor(game, canvasEl) {
@@ -1591,12 +1593,87 @@ class GameView {
     context.clearRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
     context.fillStyle = GameView.BLACK;
     context.fillRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
-    context.fillStyle = GameView.RED;
-    context.shadowColor = GameView.RED;
+    const clickToShoot = 'CLICK TO SHOOT';
+    for (let i = 0; i < clickToShoot.length; i++) {
+      const pos = [181 + 11 * i, 193];
+      this.drawChar(clickToShoot[i], pos, GameView.RED, context);
+    }
+  }
+
+  drawChar(char, pos, color, context) {
+    const points = {
+      topL: [0, 0],
+      topC: [4, 0],
+      topR: [8, 0],
+      midL: [0, 6],
+      midC: [4, 6],
+      midR: [8, 6],
+      btmL: [0, 11],
+      btmC: [4, 11],
+      btmR: [8, 11],
+    };
+    context.strokeStyle = color;
+    context.shadowColor = color;
     context.shadowBlur = GameView.SHADOW_BLUR;
-    context.font="22px Arial";
     context.beginPath();
-    context.fillText('click to shoot', 22, 22);
+    switch (char) {
+      case 'C':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'L':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'I':
+        context.moveTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        break;
+      case 'K':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'T':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.moveTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        break;
+      case 'O':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        break;
+      case 'S':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        break;
+      case 'H':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      default:
+        context.font="22px Arial";
+        context.fillStyle = GameView.RED;
+        context.fillText(char, pos[0], pos[1]);
+        break;
+    }
     context.stroke();
   }
 

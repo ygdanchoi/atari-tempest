@@ -12,5 +12,5 @@ body {
 #canvas {
   cursor: crosshair;
   margin: auto;
-  /*box-shadow: 0px 0px 10px #232323;*/
+  box-shadow: 0px 0px 10px #232323;
 }
