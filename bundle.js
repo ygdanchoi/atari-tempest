@@ -689,13 +689,151 @@ class Game {
     this.allObjects().forEach((object) => {
       object.draw(context);
     });
-    context.fillStyle = '#FFFFFF';
-    context.font="20px Arial";
-    context.shadowBlur = 0;
-    context.fillText(`Lives: ${this.lives}`, 10, 30);
-    context.fillText(`Score: ${this.score}`, 10, 50);
-    context.fillText(`Level: ${this.level}`, 10, 70);
+    this.drawLives(context);
+    this.drawScore(context);
+    this.drawLevel(context);
   }
+
+  drawLives(context) {
+    for (var i = 0; i < this.lives; i++) {
+      const pos = [44 + 27 * i, 48];
+      context.strokeStyle = Game.YELLOW;
+      context.shadowColor = Game.YELLOW;
+      context.shadowBlur = Game.SHADOW_BLUR;
+      context.beginPath();
+      context.moveTo(pos[0] + 11, pos[1] + 0);
+      context.lineTo(pos[0] + 21, pos[1] + 5);
+      context.lineTo(pos[0] + 13, pos[1] + 8);
+      context.lineTo(pos[0] + 18, pos[1] + 5);
+      context.lineTo(pos[0] + 11, pos[1] + 2);
+      context.lineTo(pos[0] + 4, pos[1] + 5);
+      context.lineTo(pos[0] + 8, pos[1] + 8);
+      context.lineTo(pos[0] + 0, pos[1] + 5);
+      context.closePath();
+      context.stroke();
+    }
+  }
+
+  drawScore(context) {
+    const score = this.score.toString();
+    for (var i = 0; i < score.length; i++) {
+      const pos = [163 - 22 * i, 20];
+      this.drawNum(score[score.length - 1 - i], pos, 'large', Game.GREEN, context);
+    }
+  }
+
+  drawLevel(context) {
+    const level = this.level.toString();
+    for (var i = 0; i < level.length; i++) {
+      const pos = [271 - 11 * i, 32];
+      this.drawNum(level[level.length - 1 - i], pos, 'small', Game.BLUE, context);
+    }
+  }
+
+  drawNum(num, pos, size, color, context) {
+    let points;
+    if (size === 'large') {
+      points = {
+        topL: [0, 0],
+        topR: [15, 0],
+        midL: [0, 11],
+        midR: [15, 11],
+        btmL: [0, 21],
+        btmR: [15, 21],
+      };
+    } else if (size === 'small') {
+      points = {
+        topL: [0, 0],
+        topR: [6, 0],
+        midL: [0, 6],
+        midR: [6, 6],
+        btmL: [0, 11],
+        btmR: [6, 11],
+      };
+    }
+    context.strokeStyle = color;
+    context.shadowColor = color;
+    context.shadowBlur = Game.SHADOW_BLUR;
+    context.beginPath();
+    switch (num) {
+      case '0':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        break;
+      case '1':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case '2':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case '3':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case '4':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case '5':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        break;
+      case '6':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        break;
+      case '7':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case '8':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case '9':
+        context.moveTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      default:
+        context.font="22px Arial";
+        context.fillText(num, pos[0], pos[1]);
+        break;
+    }
+    context.stroke();
+  }
+
 
   defineTubeQuads(tubeShape) {
     this.tubeQuads = [];
@@ -895,6 +1033,7 @@ Game.NUM_FLIPPER_POSITIONS = 7;
 Game.BLUE = '#0000cc';
 Game.YELLOW = '#ffff00';
 Game.RED = '#ff0000';
+Game.GREEN = '#00ff00';
 Game.SHADOW_BLUR = 10;
 Game.TUBE_CIRCLE = [
   [
