@@ -1592,8 +1592,11 @@ class GameView {
     context.fillStyle = GameView.BLACK;
     context.fillRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
     context.fillStyle = GameView.RED;
+    context.shadowColor = GameView.RED;
+    context.shadowBlur = GameView.SHADOW_BLUR;
     context.font="22px Arial";
-    context.fillText('CLICK TO SHOOT', 22, 22);
+    context.beginPath();
+    context.fillText('click to shoot', 22, 22);
     context.stroke();
   }
 
@@ -1603,6 +1606,7 @@ GameView.DIM_X = 512;
 GameView.DIM_Y = 450;
 GameView.BLACK = '#000000';
 GameView.RED = '#ff0000';
+GameView.SHADOW_BLUR = 10;
 
 module.exports = GameView;
 
