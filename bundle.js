@@ -1530,7 +1530,8 @@ class GameView {
     this.context = canvasEl.getContext('2d');
     this.blaster = this.game.blaster;
     this.bindHandlers(canvasEl);
-    this.drawSplashScreen(this.context);
+    this.animate();
+    this.clickToStartTimer = 16;
   }
 
   bindHandlers(canvasEl) {
@@ -1575,18 +1576,17 @@ class GameView {
     if (this.game.over === true) {
       this.game.over = false;
       this.game.start();
-      setTimeout(this.animate.bind(this), 33); // 30 fps
     }
   }
 
   animate(time) {
-    this.game.step();
-    this.game.draw(this.context);
     if (!this.game.over) {
-      setTimeout(this.animate.bind(this), 33); // 30 fps
+      this.game.step();
+      this.game.draw(this.context);
     } else {
       this.drawSplashScreen(this.context);
     }
+    setTimeout(this.animate.bind(this), 33); // 30 fps
   }
 
   drawSplashScreen(context) {
@@ -1595,11 +1595,16 @@ class GameView {
     context.fillRect(0, 0, GameView.DIM_X, GameView.DIM_Y);
     this.game.drawScore(context);
     this.game.drawLevel(context);
-    const clickToStart = 'CLICK TO START';
-    for (let i = 0; i < clickToStart.length; i++) {
-      const pos = [181 + 11 * i, 193];
-      this.drawChar(clickToStart[i], pos, GameView.RED, context);
+    if (this.clickToStartTimer > 0) {
+      const clickToStart = 'CLICK TO START';
+      for (let i = 0; i < clickToStart.length; i++) {
+        const pos = [181 + 11 * i, 193];
+        this.drawChar(clickToStart[i], pos, GameView.RED, context);
+      }
+    } else if (this.clickToStartTimer < -8) {
+      this.clickToStartTimer = 16;
     }
+    this.clickToStartTimer -= 1;
   }
 
   drawChar(char, pos, color, context) {
