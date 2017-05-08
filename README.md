@@ -1,10 +1,10 @@
-# Bowtie Brutality IN SPACE
+# Atari Tempest Lite
 
 Play Here
 
 ## About
 
-Bowtie Brutality IN SPACE is a retro browser game built with JavaScript and Canvas. Inspired by Tempest, a 1981 arcade game by Atari, it calculates vectors on the fly to render three-dimensional surfaces.
+Atari Tempest Lite is a retro browser game built with JavaScript and Canvas. Inspired by Tempest, a 1981 arcade game by Atari, it calculates vectors on the fly to render three-dimensional surfaces.
 
 ## How to Play
 
