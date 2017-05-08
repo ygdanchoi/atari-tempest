@@ -1576,6 +1576,7 @@ class GameView {
     if (this.game.over === true) {
       this.game.over = false;
       this.game.start();
+      this.clickToStartTimer = 16;
     }
   }
 
