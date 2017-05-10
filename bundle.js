@@ -1568,10 +1568,8 @@ class EnemyBullet extends MovingObject {
     this.tubeQuadIdx = options.tubeQuadIdx;
     this.zPos = options.zPos;
     this.zVel = this.game.enemyBulletZVel;
-    if (this.zPos > 0) {
-      this.game.enemyBulletSound.currentTime = 0;
-      this.game.enemyBulletSound.play();
-    }
+    this.game.enemyBulletSound.currentTime = 0;
+    this.game.enemyBulletSound.play();
   }
 
   draw(context) {
@@ -1836,7 +1834,7 @@ class Flipper extends MovingObject {
   }
 
   fireBullet() {
-    if (this.game.enemyBullets.length < this.game.maxNumEnemyBullets) {
+    if (this.zPos > 0 && this.game.enemyBullets.length < this.game.maxNumEnemyBullets) {
       const enemyBullet = new EnemyBullet({
         tubeQuadIdx: this.tubeQuadIdx,
         zPos: this.zPos,
