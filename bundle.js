@@ -1807,7 +1807,6 @@ class Flipper extends MovingObject {
       const posFarLeft = farLeftTubeQuad[1];
       let theta = Util.theta(tubeQuad[0], tubeQuad[1], posFarLeft);
       theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
-      console.log(theta / Math.PI * 180);
       orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, orthogonalHeight);
       posPivotRight = Util.rotateAroundPoint(posPivotRight, posPivotLeft, theta);
       orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
@@ -1816,7 +1815,6 @@ class Flipper extends MovingObject {
       const posFarRight = farRightTubeQuad[0];
       let theta = Util.theta(posFarRight, tubeQuad[0], tubeQuad[1]);
       theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
-      console.log(theta / Math.PI * 180);
       orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, -orthogonalHeight);
       posPivotLeft = Util.rotateAroundPoint(posPivotLeft, posPivotRight, theta);
       orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
