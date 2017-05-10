@@ -128,7 +128,7 @@ const Util = {
     return [x1 * (1 - weight) + x2 * weight, y1 * (1 - weight) + y2 * weight];
   },
 
-  vector(point1, point2, scalar) {
+  vector(point1, point2, scalar = 1) {
     const x1 = point1[0];
     const y1 = point1[1];
     const x2 = point2[0];
@@ -136,7 +136,7 @@ const Util = {
     return [(x2 - x1) * scalar, (y2 - y1) * scalar];
   },
 
-  unitVector(point1, point2, scalar) {
+  unitVector(point1, point2, scalar = 1) {
     const x1 = point1[0];
     const y1 = point1[1];
     const x2 = point2[0];
@@ -145,7 +145,7 @@ const Util = {
     return [(x2 - x1) / distance * scalar, (y2 - y1) / distance * scalar];
   },
 
-  orthogonalUnitVector(point1, point2, scalar) {
+  orthogonalUnitVector(point1, point2, scalar = 1) {
     const x1 = point1[0];
     const y1 = point1[1];
     const x2 = point2[0];
@@ -155,15 +155,7 @@ const Util = {
     return [y, -x];
   },
 
-  addVector(point1, point2) {
-    const x1 = point1[0];
-    const y1 = point1[1];
-    const x2 = point2[0];
-    const y2 = point2[1];
-    return [x1 + x2, y1 + y2];
-  },
-
-  addVectorScaled(point1, point2, scalar) {
+  addVector(point1, point2, scalar = 1) {
     const x1 = point1[0];
     const y1 = point1[1];
     const x2 = point2[0];
@@ -187,6 +179,14 @@ const Util = {
     const x = (x1 - x2) * Math.cos(angle) - (y1 - y2) * Math.sin(angle) + x2;
     const y = (x1 - x2) * Math.sin(angle) + (y1 - y2) * Math.cos(angle) + y2;
     return [x, y];
+  },
+
+  easeInQuad(fraction) {
+    return Math.pow(fraction, 2);
+  },
+
+  easeOutQuad(fraction) {
+    return 1 - Math.pow(fraction - 1, 2);
   },
 };
 
@@ -238,12 +238,11 @@ class BlasterBullet extends MovingObject {
     context.shadowColor = BlasterBullet.WHITE;
     context.shadowBlur = BlasterBullet.SHADOW_BLUR;
     context.beginPath();
-    const posFrom = Util.midpoint(tubeQuad[0], tubeQuad[1]);
-    const posTo = Util.midpoint(tubeQuad[2], tubeQuad[3]);
-    const zFraction = this.zPos / BlasterBullet.MAX_Z_POS;
-    const easeFraction = 1 - Math.pow(zFraction - 1, 2);
-    const vectorTo = Util.vector(posFrom, posTo, easeFraction);
-    const pos = Util.addVector(posFrom, vectorTo);
+    const posRim = Util.midpoint(tubeQuad[0], tubeQuad[1]);
+    const posPit = Util.midpoint(tubeQuad[2], tubeQuad[3]);
+    const easeFraction = Util.easeOutQuad(this.zPos / BlasterBullet.MAX_Z_POS);
+    const distInwards = Util.vector(posRim, posPit, easeFraction);
+    const pos = Util.addVector(posRim, distInwards);
     context.arc(
       pos[0], pos[1], 3 * (1 - easeFraction) + 1, 0, 2 * Math.PI, true
     );
@@ -251,13 +250,14 @@ class BlasterBullet extends MovingObject {
   }
 
   move(delta) {
-    this.zPos += 5;
-    if (this.zPos > 120) {
+    this.zPos += BlasterBullet.Z_VEL;
+    if (this.zPos > BlasterBullet.MAX_Z_POS) {
       this.remove();
     }
   }
 }
 
+BlasterBullet.Z_VEL = 5;
 BlasterBullet.WHITE = '#ffffff';
 BlasterBullet.SHADOW_BLUR = 10;
 BlasterBullet.MAX_Z_POS = 120;
@@ -424,21 +424,25 @@ class BlasterExplosion extends MovingObject {
   drawExplosion(context) {
     const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
     const pos = Util.midpoint(tubeQuad[0], tubeQuad[1]);
-    const colors = [BlasterExplosion.RED, BlasterExplosion.WHITE, BlasterExplosion.YELLOW];
     for (let i = 0; i < BlasterExplosion.COORDS.length - 1; i += 2) {
       context.beginPath();
-      const flip = this.shrinking ? 1 : -1;
-      context.strokeStyle = colors[(BlasterExplosion.MAX_SIZE + i / 2 + this.size * flip) % 3];
-      context.shadowColor = colors[(BlasterExplosion.MAX_SIZE + i / 2 + this.size * flip) % 3];
+      context.strokeStyle = this.cycleColors(i);
+      context.shadowColor = this.cycleColors(i);
       context.shadowBlur = BlasterExplosion.SHADOW_BLUR;
       for (var j = 1; j <= this.size; j += 2) {
         const scalar = j / (BlasterExplosion.MAX_SIZE - 1);
-        context.moveTo(...Util.addVectorScaled(pos, BlasterExplosion.COORDS[i], scalar));
-        context.lineTo(...Util.addVectorScaled(pos, BlasterExplosion.COORDS[i + 1], scalar));
-        context.lineTo(...Util.addVectorScaled(pos, BlasterExplosion.COORDS[i + 2], scalar));
+        context.moveTo(...Util.addVector(pos, BlasterExplosion.COORDS[i], scalar));
+        context.lineTo(...Util.addVector(pos, BlasterExplosion.COORDS[i + 1], scalar));
+        context.lineTo(...Util.addVector(pos, BlasterExplosion.COORDS[i + 2], scalar));
       }
       context.stroke();
     }
+  }
+
+  cycleColors(i) {
+    const colors = [BlasterExplosion.RED, BlasterExplosion.WHITE, BlasterExplosion.YELLOW];
+    const flip = this.shrinking ? 1 : -1;
+    return colors[(BlasterExplosion.MAX_SIZE + i / 2 + this.size * flip) % 3];
   }
 
   move(delta) {
@@ -459,7 +463,7 @@ BlasterExplosion.MAX_SIZE = 12;
 BlasterExplosion.WHITE = '#ffffff';
 BlasterExplosion.YELLOW = '#ffff00';
 BlasterExplosion.RED = '#ff0000';
-BlasterExplosion.SHADOW_BLUR;
+BlasterExplosion.SHADOW_BLUR = 10;
 BlasterExplosion.COORDS = [
   [6, -72],
   [31, -86],
@@ -514,33 +518,21 @@ class EnemyExplosion extends MovingObject {
 
   drawExplosion(context) {
     const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
-    const posFrom = Util.midpoint(tubeQuad[0], tubeQuad[1]);
-    const posTo = Util.midpoint(tubeQuad[2], tubeQuad[3]);
-    const zFraction = this.zPos / EnemyExplosion.MAX_Z_POS;
-    const easeFraction = 1 - Math.pow(zFraction - 1, 2);
-    const vectorTo = Util.vector(posFrom, posTo, easeFraction);
-    const pos = Util.addVector(posFrom, vectorTo);
-    const size = 10 * this.size * (2 - easeFraction);
+    const posRim = Util.midpoint(tubeQuad[0], tubeQuad[1]);
+    const posPit = Util.midpoint(tubeQuad[2], tubeQuad[3]);
+    const easeFraction = Util.easeOutQuad(this.zPos / EnemyExplosion.MAX_Z_POS);
+    const distInwards = Util.vector(posRim, posPit, easeFraction);
+    const pos = Util.addVector(posRim, distInwards);
+    const size = EnemyExplosion.ABS_SIZE * this.size * (2 - easeFraction);
     context.strokeStyle = EnemyExplosion.WHITE;
     context.shadowColor = EnemyExplosion.WHITE;
     context.shadowBlur = EnemyExplosion.WHITE;
     context.beginPath();
-    context.moveTo(pos[0] - size, pos[1]);
-    context.lineTo(pos[0] + size , pos[1]);
-    context.moveTo(pos[0], pos[1] - size);
-    context.lineTo(pos[0], pos[1] + size);
-    context.moveTo(pos[0] - size / Math.sqrt(2), pos[1] - size / Math.sqrt(2));
-    context.lineTo(pos[0] + size / Math.sqrt(2), pos[1] + size / Math.sqrt(2));
-    context.moveTo(pos[0] + size / Math.sqrt(2), pos[1] - size / Math.sqrt(2));
-    context.lineTo(pos[0] - size / Math.sqrt(2), pos[1] + size / Math.sqrt(2));
-    context.moveTo(pos[0] + size * Math.sin(Math.PI / 8), pos[1] + size * Math.cos(Math.PI / 8));
-    context.lineTo(pos[0] - size * Math.sin(Math.PI / 8), pos[1] - size * Math.cos(Math.PI / 8));
-    context.moveTo(pos[0] + size * Math.sin(3 * Math.PI / 8), pos[1] + size * Math.cos(3 * Math.PI / 8));
-    context.lineTo(pos[0] - size * Math.sin(3 * Math.PI / 8), pos[1] - size * Math.cos(3 * Math.PI / 8));
-    context.moveTo(pos[0] + size * Math.sin(Math.PI / 8), pos[1] - size * Math.cos(Math.PI / 8));
-    context.lineTo(pos[0] - size * Math.sin(Math.PI / 8), pos[1] + size * Math.cos(Math.PI / 8));
-    context.moveTo(pos[0] + size * Math.sin(3 * Math.PI / 8), pos[1] - size * Math.cos(3 * Math.PI / 8));
-    context.lineTo(pos[0] - size * Math.sin(3 * Math.PI / 8), pos[1] + size * Math.cos(3 * Math.PI / 8));
+    for (var i = 0; i < 8; i++) {
+      const theta = i * Math.PI / 8;
+      context.moveTo(pos[0] + size * Math.sin(theta), pos[1] + size * Math.cos(theta));
+      context.lineTo(pos[0] - size * Math.sin(theta), pos[1] - size * Math.cos(theta));
+    }
     context.closePath();
     context.stroke();
   }
@@ -555,6 +547,7 @@ class EnemyExplosion extends MovingObject {
 
 EnemyExplosion.WHITE = '#ffffff';
 EnemyExplosion.SHADOW_BLUR = 10;
+EnemyExplosion.ABS_SIZE = 10;
 EnemyExplosion.MAX_Z_POS = 120;
 
 module.exports = EnemyExplosion;
@@ -1462,12 +1455,11 @@ class EnemyBullet extends MovingObject {
     context.shadowColor = EnemyBullet.WHITE;
     context.shadowBlur = EnemyBullet.WHITE;
     context.beginPath();
-    const posFrom = Util.midpoint(tubeQuad[0], tubeQuad[1]);
-    const posTo = Util.midpoint(tubeQuad[2], tubeQuad[3]);
-    const zFraction = this.zPos / EnemyBullet.MAX_Z_POS;
-    const easeFraction = 1 - Math.pow(zFraction - 1, 2);
-    const vectorTo = Util.vector(posFrom, posTo, easeFraction);
-    const pos = Util.addVector(posFrom, vectorTo);
+    const posRim = Util.midpoint(tubeQuad[0], tubeQuad[1]);
+    const posPit = Util.midpoint(tubeQuad[2], tubeQuad[3]);
+    const easeFraction = Util.easeOutQuad(this.zPos / EnemyBullet.MAX_Z_POS);
+    const distInwards = Util.vector(posRim, posPit, easeFraction);
+    const pos = Util.addVector(posRim, distInwards);
     context.arc(
       pos[0], pos[1], 3 * (1 - easeFraction) + 1, 0, 2 * Math.PI, true
     );
@@ -1767,8 +1759,7 @@ class Flipper extends MovingObject {
     context.shadowColor = Flipper.RED;
     context.shadowBlur = Flipper.SHADOW_BLUR;
     context.beginPath();
-    const zFraction = this.zPos / Flipper.MAX_Z_POS;
-    const easeFraction = 1 - Math.pow(zFraction - 1, 2);
+    const easeFraction = Util.easeOutQuad(this.zPos / Flipper.MAX_Z_POS);
     const vectorTo0 = Util.vector(tubeQuad[0], tubeQuad[3], easeFraction);
     const vectorTo1 = Util.vector(tubeQuad[1], tubeQuad[2], easeFraction);
     let pos0 = Util.addVector(tubeQuad[0], vectorTo0);
