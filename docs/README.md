@@ -27,9 +27,9 @@ In addition, this project will include:
 
 This app will consist of a single screen with game board and nav links to the Github and my LinkedIn. The game will be controlled by the mouse position (move), the left mouse button or space (fire), and the right mouse button or Z key (superzapper). Upon load, the game will simply display a ‘CLICK MOUSE’ message.
 
-![start](https://raw.githubusercontent.com/ygdanchoi/atari-tempest/master/start.PNG)
+![start](https://raw.githubusercontent.com/ygdanchoi/atari-tempest/master/docs/start.PNG)
 
-![start](https://raw.githubusercontent.com/ygdanchoi/atari-tempest/master/tube.PNG)
+![start](https://raw.githubusercontent.com/ygdanchoi/atari-tempest/master/docs/tube.PNG)
 
 ## Architecture and Technologies
 
