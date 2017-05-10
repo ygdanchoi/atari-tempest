@@ -548,32 +548,29 @@ class Blaster extends MovingObject {
   }
 
   drawBlaster(context, tubeQuad) {
-    const posOuterMid = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], (this.xPosInTubeQuad + 1) / (Blaster.NUM_BLASTER_POSITIONS + 1));
-    const posOuterLeft = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.9);
-    const posOuterClawLeft = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.6);
-    const posOuterClawRight = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.4);
-    const posOuterRight = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.1);
-    const posInnerMid = Util.weightedMidpoint(tubeQuad[3], tubeQuad[2], (this.xPosInTubeQuad + 1) / (Blaster.NUM_BLASTER_POSITIONS + 1));
-    const vectorOuterBack = Util.unitVector(posOuterMid, posInnerMid, -20);
-    const vectorInnerBack = Util.unitVector(posOuterMid, posInnerMid, -10);
-    const vectorClawLeft = Util.unitVector(posOuterClawLeft, posInnerMid, 10);
-    const vectorClawRight = Util.unitVector(posOuterClawRight, posInnerMid, 10);
-    const posOuterBack = Util.addVector(posOuterMid, vectorOuterBack);
-    const posInnerBack = Util.addVector(posOuterMid, vectorInnerBack);
-    const posClawLeft = Util.addVector(posOuterClawLeft, vectorClawLeft);
-    const posClawRight = Util.addVector(posOuterClawRight, vectorClawRight);
+    const posRimFlexible = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], (this.xPosInTubeQuad + 1) / (Blaster.NUM_BLASTER_POSITIONS + 1));
+    const posRimLeft = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.9);
+    const posRimMidLeft = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.6);
+    const posRimMidRight = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.4);
+    const posRimRight = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.1);
+    const posPitFlexible = Util.weightedMidpoint(tubeQuad[3], tubeQuad[2], (this.xPosInTubeQuad + 1) / (Blaster.NUM_BLASTER_POSITIONS + 1));
+    const toClawBack = Util.orthogonalUnitVector(tubeQuad[0], tubeQuad[1], 10);
+    const posClawBackOuter = Util.addVector(posRimFlexible, toClawBack, 2);
+    const posClawBackInner = Util.addVector(posRimFlexible, toClawBack);
+    const posClawPointLeft = Util.addVector(posRimMidLeft, toClawBack, -1);
+    const posClawPointRight = Util.addVector(posRimMidRight, toClawBack, -1);
     context.strokeStyle = Blaster.YELLOW;
     context.shadowColor = Blaster.YELLOW;
     context.shadowBlur = Blaster.SHADOW_BLUR;
     context.beginPath();
     context.moveTo(...tubeQuad[0]);
-    context.lineTo(...posOuterBack);
+    context.lineTo(...posClawBackOuter);
     context.lineTo(...tubeQuad[1]);
-    context.lineTo(...posClawLeft);
-    context.lineTo(...posOuterLeft);
-    context.lineTo(...posInnerBack);
-    context.lineTo(...posOuterRight);
-    context.lineTo(...posClawRight);
+    context.lineTo(...posClawPointLeft);
+    context.lineTo(...posRimLeft);
+    context.lineTo(...posClawBackInner);
+    context.lineTo(...posRimRight);
+    context.lineTo(...posClawPointRight);
     context.closePath();
     context.stroke();
   }
