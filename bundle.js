@@ -171,6 +171,15 @@ const Util = {
     return (y2 - y1) / (x2 - x1);
   },
 
+  theta(point1, point2, point3) {
+    const a = Util.distanceBetweenPoints(point1, point2);
+    const b = Util.distanceBetweenPoints(point2, point3);
+    const c = Util.distanceBetweenPoints(point1, point3);
+    const numerator = Math.pow(a, 2) + Math.pow(b, 2) - Math.pow(c, 2);
+    const denominator = 2 * a * b;
+    return Math.acos(numerator/denominator);
+  },
+
   rotateAroundPoint(point1, point2, angle) {
     const x1 = point1[0];
     const y1 = point1[1];
@@ -1778,35 +1787,50 @@ class Flipper extends MovingObject {
     context.shadowBlur = Flipper.SHADOW_BLUR;
     context.beginPath();
     const easeFraction = Util.easeOutQuad(this.zPos / Flipper.MAX_Z_POS);
-    const vectorTo0 = Util.vector(tubeQuad[0], tubeQuad[3], easeFraction);
-    const vectorTo1 = Util.vector(tubeQuad[1], tubeQuad[2], easeFraction);
-    let pos0 = Util.addVector(tubeQuad[0], vectorTo0);
-    let pos1 = Util.addVector(tubeQuad[1], vectorTo1);
-    context.fill();
+    const toRimRight = Util.vector(tubeQuad[0], tubeQuad[3], easeFraction);
+    const toRimLeft = Util.vector(tubeQuad[1], tubeQuad[2], easeFraction);
     const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
+    let posPivotRight = Util.addVector(tubeQuad[0], toRimRight);
+    let posPivotLeft = Util.addVector(tubeQuad[1], toRimLeft);
     let orthogonalVector;
-    if (this.xPosInTubeQuad > midFlip) {
-      orthogonalVector = Util.orthogonalUnitVector(pos0, pos1, 15 * (1 - 0.9 * easeFraction));
-      pos0 = Util.rotateAroundPoint(pos0, pos1, -Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
-      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], -Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
-    } else {
-      orthogonalVector = Util.orthogonalUnitVector(pos0, pos1, -15 * (1 - 0.9 * easeFraction));
-      pos1 = Util.rotateAroundPoint(pos1, pos0, -Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
-      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], -Math.PI * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS);
+    const orthogonalHeight = 15 * (1 - 0.9 * easeFraction);
+    let leftTubeIdx = this.tubeQuadIdx + 1;
+    if (leftTubeIdx >= this.game.tubeQuads.length) {
+      leftTubeIdx = 0;
     }
-    const halfOrthogonalVector = Util.vector([0, 0], orthogonalVector, 0.5);
-    const pos0Inner = Util.addVector(Util.weightedMidpoint(pos0, pos1, 0.1), orthogonalVector);
-    const pos0Crease = Util.addVector(Util.weightedMidpoint(pos0, pos1, 0.2), halfOrthogonalVector);
-    const pos1Crease = Util.addVector(Util.weightedMidpoint(pos0, pos1, 0.8), halfOrthogonalVector);
-    const pos1Inner = Util.addVector(Util.weightedMidpoint(pos0, pos1, 0.9), orthogonalVector);
+    let rightTubeIdx = this.tubeQuadIdx - 1;
+    if (rightTubeIdx < 0) {
+      rightTubeIdx = this.game.tubeQuads.length - 1;
+    }
+    if (this.xPosInTubeQuad > midFlip) {
+      const farTubeQuad = this.game.tubeQuads[leftTubeIdx];
+      const farPosPivot = farTubeQuad[1];
+      let theta = Util.theta(tubeQuad[0], tubeQuad[1], farPosPivot);
+      theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
+      orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, orthogonalHeight);
+      posPivotRight = Util.rotateAroundPoint(posPivotRight, posPivotLeft, theta);
+      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
+    } else {
+      const farTubeQuad = this.game.tubeQuads[rightTubeIdx];
+      const farPosPivot = farTubeQuad[0];
+      let theta = Util.theta(tubeQuad[1], tubeQuad[0], farPosPivot);
+      theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
+      orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, -orthogonalHeight);
+      posPivotLeft = Util.rotateAroundPoint(posPivotLeft, posPivotRight, theta);
+      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
+    }
+    const posCornerRight = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.1), orthogonalVector);
+    const posCreaseRight = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.2), orthogonalVector, 0.5);
+    const posCreaseLeft = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.8), orthogonalVector, 0.5);
+    const posCornerLeft = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.9), orthogonalVector);
 
     context.strokeStyle = '#ff0000';
-    context.moveTo(...pos0);
-    context.lineTo(...pos1Inner);
-    context.lineTo(...pos1Crease);
-    context.lineTo(...pos1);
-    context.lineTo(...pos0Inner);
-    context.lineTo(...pos0Crease);
+    context.moveTo(...posPivotRight);
+    context.lineTo(...posCornerLeft);
+    context.lineTo(...posCreaseLeft);
+    context.lineTo(...posPivotLeft);
+    context.lineTo(...posCornerRight);
+    context.lineTo(...posCreaseRight);
     context.closePath();
     context.stroke();
   }
