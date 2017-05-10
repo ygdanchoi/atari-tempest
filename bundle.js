@@ -188,6 +188,221 @@ const Util = {
   easeOutQuad(fraction) {
     return 1 - Math.pow(fraction - 1, 2);
   },
+
+  drawString(string, pos, size, align, color, context) {
+    string = string.toString();
+    let width;
+    if (size === 'small') {
+      width = 11;
+    } else if (size === 'large') {
+      width = 22;
+    }
+    if (align === 'align-left') {
+      for (let i = 0; i < string.length; i++) {
+        newPos = Util.addVector(pos, [width * i, 0]);
+        Util.drawChar(string[i], newPos, size, color, context);
+      }
+    } else if (align === 'align-right') {
+      for (let i = 0; i < string.length; i++) {
+        newPos = Util.addVector(pos, [width * i, 0], -1);
+        Util.drawChar(string[string.length - 1 - i], newPos, size, color, context);
+      }
+    }
+  },
+
+  drawChar(char, pos, size, color, context) {
+    let points;
+    if (size === 'large') {
+      points = {
+        topL: [0, 0],
+        topC: [8, 0],
+        topR: [15, 0],
+        midL: [0, 11],
+        midC: [8, 11],
+        midR: [15, 11],
+        btmL: [0, 21],
+        btmC: [8, 21],
+        btmR: [15, 21],
+      };
+    } else if (size === 'small') {
+      points = {
+        topL: [0, 0],
+        topC: [4, 0],
+        topR: [8, 0],
+        midL: [0, 6],
+        midC: [4, 6],
+        midR: [8, 6],
+        btmL: [0, 11],
+        btmC: [4, 11],
+        btmR: [8, 11],
+      };
+    }
+    context.strokeStyle = color;
+    context.shadowColor = color;
+    context.shadowBlur = 10;
+    context.beginPath();
+    switch (char) {
+      case '0':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        break;
+      case '1':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case '2':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case '3':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case '4':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case '5':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        break;
+      case '6':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        break;
+      case '7':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case '8':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case '9':
+        context.moveTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case 'A':
+        context.moveTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case 'C':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'E':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case 'H':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'I':
+        context.moveTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        break;
+      case 'K':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'L':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'O':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        break;
+      case 'R':
+        context.moveTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'S':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        break;
+      case 'T':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.moveTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        break;
+      case 'V':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        break;
+      case ' ':
+        break;
+      default:
+        context.font="22px Arial";
+        context.fillText(char, pos[0], pos[1]);
+        break;
+    }
+    context.stroke();
+  },
+
 };
 
 module.exports = Util;
@@ -241,8 +456,8 @@ class BlasterBullet extends MovingObject {
     const posRim = Util.midpoint(tubeQuad[0], tubeQuad[1]);
     const posPit = Util.midpoint(tubeQuad[2], tubeQuad[3]);
     const easeFraction = Util.easeOutQuad(this.zPos / BlasterBullet.MAX_Z_POS);
-    const distInwards = Util.vector(posRim, posPit, easeFraction);
-    const pos = Util.addVector(posRim, distInwards);
+    const distInward = Util.vector(posRim, posPit, easeFraction);
+    const pos = Util.addVector(posRim, distInward);
     context.arc(
       pos[0], pos[1], 3 * (1 - easeFraction) + 1, 0, 2 * Math.PI, true
     );
@@ -521,8 +736,8 @@ class EnemyExplosion extends MovingObject {
     const posRim = Util.midpoint(tubeQuad[0], tubeQuad[1]);
     const posPit = Util.midpoint(tubeQuad[2], tubeQuad[3]);
     const easeFraction = Util.easeOutQuad(this.zPos / EnemyExplosion.MAX_Z_POS);
-    const distInwards = Util.vector(posRim, posPit, easeFraction);
-    const pos = Util.addVector(posRim, distInwards);
+    const distInward = Util.vector(posRim, posPit, easeFraction);
+    const pos = Util.addVector(posRim, distInward);
     const size = EnemyExplosion.ABS_SIZE * this.size * (2 - easeFraction);
     context.strokeStyle = EnemyExplosion.WHITE;
     context.shadowColor = EnemyExplosion.WHITE;
@@ -631,7 +846,7 @@ class Game {
     }
   }
 
-  allObjects() {
+  allObjectsInTube() {
     return [].concat(
       this.blasters,
       this.blasterBullets,
@@ -642,14 +857,22 @@ class Game {
     );
   }
 
-  outerEnemies() {
-    let outerEnemies = 0;
+  allEnemies() {
+    return [].concat(
+      this.flippers,
+      this.innerEnemyQueue,
+      Array(this.outerQueueEnemies())
+    );
+  }
+
+  outerQueueEnemies() {
+    let outerQueueEnemies = 0;
     for (let i = 0; i < this.outerEnemyQueue.length; i++) {
       if (this.outerEnemyQueue[i] !== null) {
-        outerEnemies += 1;
+        outerQueueEnemies += 1;
       }
     }
-    return outerEnemies;
+    return outerQueueEnemies;
   }
 
   checkCollisions() {
@@ -682,7 +905,7 @@ class Game {
     this.drawTubeQuads(context, Game.BLUE);
     this.drawInnerEnemyQueue(context);
     this.drawOuterEnemyQueue(context);
-    this.allObjects().forEach((object) => {
+    this.allObjectsInTube().forEach((object) => {
       object.draw(context);
     });
   }
@@ -717,148 +940,12 @@ class Game {
   }
 
   drawScore(context) {
-    const score = this.score.toString();
-    for (var i = 0; i < score.length; i++) {
-      const pos = [163 - 22 * i, 20];
-      this.drawNum(score[score.length - 1 - i], pos, 'large', Game.GREEN, context);
-    }
+    Util.drawString(this.score, [163, 20], 'large', 'align-right', Game.GREEN, context);
   }
 
   drawLevel(context) {
-    const level = `LEVEL ${this.level}`;
-    for (let i = 0; i < level.length; i++) {
-      const pos = [271 - 11 * i, 32];
-      this.drawNum(level[level.length - 1 - i], pos, 'small', Game.BLUE, context);
-    }
+    Util.drawString(`LEVEL ${this.level}`, [271, 32], 'small', 'align-right', Game.BLUE, context);
   }
-
-  drawNum(num, pos, size, color, context) {
-    let points;
-    if (size === 'large') {
-      points = {
-        topL: [0, 0],
-        topR: [15, 0],
-        midL: [0, 11],
-        midR: [15, 11],
-        btmL: [0, 21],
-        btmR: [15, 21],
-      };
-    } else if (size === 'small') {
-      points = {
-        topL: [0, 0],
-        topC: [4, 0],
-        topR: [8, 0],
-        midL: [0, 6],
-        midC: [4, 6],
-        midR: [8, 6],
-        btmL: [0, 11],
-        btmC: [4, 11],
-        btmR: [8, 11],
-      };
-    }
-    context.strokeStyle = color;
-    context.shadowColor = color;
-    context.shadowBlur = Game.SHADOW_BLUR;
-    context.beginPath();
-    switch (num) {
-      case '0':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.topL));
-        break;
-      case '1':
-        context.moveTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      case '2':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        context.lineTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      case '3':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.moveTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        break;
-      case '4':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        context.moveTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      case '5':
-        context.moveTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        break;
-      case '6':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        context.lineTo(...Util.addVector(pos, points.midL));
-        break;
-      case '7':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      case '8':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.topL));
-        context.moveTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        break;
-      case '9':
-        context.moveTo(...Util.addVector(pos, points.btmR));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        break;
-      case 'L':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      case 'E':
-        context.moveTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        context.moveTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        break;
-      case 'V':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.btmC));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        break;
-      case ' ':
-        break;
-      default:
-        context.font="22px Arial";
-        context.fillText(num, pos[0], pos[1]);
-        break;
-    }
-    context.stroke();
-  }
-
 
   defineTubeQuads(tubeShape) {
     this.tubeQuads = [];
@@ -878,42 +965,56 @@ class Game {
 
     context.strokeStyle = color;
     for (let i = 0; i < this.tubeQuads.length; i++) {
-      const quadrilateral = this.tubeQuads[i];
+      const tubeQuad = this.tubeQuads[i];
       context.beginPath();
-      context.moveTo(...quadrilateral[0]);
-      context.lineTo(...quadrilateral[1]);
-      context.lineTo(...quadrilateral[2]);
-      context.lineTo(...quadrilateral[3]);
+      context.moveTo(...tubeQuad[0]);
+      context.lineTo(...tubeQuad[1]);
+      context.lineTo(...tubeQuad[2]);
+      context.lineTo(...tubeQuad[3]);
       context.closePath();
       context.stroke();
     }
   }
 
   drawInnerEnemyQueue(context) {
-    if (this.innerEnemyQueue.length > 0 && this.outerEnemies() < this.maxNumEnemies && this.outerEnemyQueue[this.innerEnemyQueue[0].tubeQuadIdx] === null && Math.random() < 0.5) {
-      this.outerEnemyQueue[this.innerEnemyQueue[0].tubeQuadIdx] = this.innerEnemyQueue.shift().enemyType;
-    }
+    this.pushFirstInnerEnemyToOuterEnemyQueue();
 
     for (let i = 0; i < this.innerEnemyQueue.length; i++) {
-      if (!this.died) {
-        this.innerEnemyQueue[i].tubeQuadIdx -= 0.5;
-        if (this.innerEnemyQueue[i].tubeQuadIdx < 0) {
-          this.innerEnemyQueue[i].tubeQuadIdx = this.tubeQuads.length - 0.5;
-        }
-      }
+      this.rotateInnerEnemy(i);
       let enemy = this.innerEnemyQueue[i];
       context.fillStyle = Game.RED;
       context.shadowColor = Game.RED;
       context.shadowBlur = Game.SHADOW_BLUR;
       const tubeQuad = this.tubeQuads[Math.floor(enemy.tubeQuadIdx)];
-      const posFrom = Util.midpoint(tubeQuad[2], tubeQuad[3]);
-      const vectorTo = Util.orthogonalUnitVector(tubeQuad[2], tubeQuad[3], 10 + 5 * enemy.zPos);
-      const pos = Util.addVector(posFrom, vectorTo);
+      const posPit = Util.midpoint(tubeQuad[2], tubeQuad[3]);
+      const distInward = Util.orthogonalUnitVector(tubeQuad[2], tubeQuad[3], 10 + 5 * enemy.zPos);
+      const pos = Util.addVector(posPit, distInward);
       context.beginPath();
       context.arc(
         pos[0], pos[1], 1, 0, 2 * Math.PI, true
       );
       context.fill();
+    }
+  }
+
+  pushFirstInnerEnemyToOuterEnemyQueue() {
+    const innerEnemiesExist = this.innerEnemyQueue.length > 0;
+    const outerQueueEnemiesHasRoom = this.outerQueueEnemies() < this.maxNumEnemies;
+    if (innerEnemiesExist & outerQueueEnemiesHasRoom) {
+      const firstInnerEnemyIdx = this.innerEnemyQueue[0].tubeQuadIdx;
+      const outerEnemySlotIsVacant = this.outerEnemyQueue[firstInnerEnemyIdx] === null;
+      if (outerEnemySlotIsVacant && Math.random() < 0.5) {
+        this.outerEnemyQueue[firstInnerEnemyIdx] = this.innerEnemyQueue.shift().enemyType;
+      }
+    }
+  }
+
+  rotateInnerEnemy(i) {
+    if (!this.died) {
+      this.innerEnemyQueue[i].tubeQuadIdx -= 0.5;
+      if (this.innerEnemyQueue[i].tubeQuadIdx < 0) {
+        this.innerEnemyQueue[i].tubeQuadIdx = this.tubeQuads.length - 0.5;
+      }
     }
   }
 
@@ -924,9 +1025,9 @@ class Game {
         context.shadowColor = Game.RED;
         context.shadowBlur = Game.SHADOW_BLUR;
         const tubeQuad = this.tubeQuads[i];
-        const posFrom = Util.midpoint(tubeQuad[2], tubeQuad[3]);
-        const vectorTo = Util.orthogonalUnitVector(tubeQuad[2], tubeQuad[3], 5);
-        const pos = Util.addVector(posFrom, vectorTo);
+        const posPit = Util.midpoint(tubeQuad[2], tubeQuad[3]);
+        const distInward = Util.orthogonalUnitVector(tubeQuad[2], tubeQuad[3], 5);
+        const pos = Util.addVector(posPit, distInward);
         context.beginPath();
         context.arc(
           pos[0], pos[1], 1, 0, 2 * Math.PI, true
@@ -966,7 +1067,7 @@ class Game {
         object.move(delta);
       });
     } else {
-      this.allObjects().forEach((object) => {
+      this.allObjectsInTube().forEach((object) => {
         object.move(delta);
       });
     }
@@ -991,10 +1092,7 @@ class Game {
     }
   }
 
-  step(delta) {
-    this.checkCollisions();
-    this.moveObjects(delta);
-
+  addOuterEnemyQueueToTube() {
     const enemies = [].concat(
       this.flippers
     );
@@ -1014,39 +1112,53 @@ class Game {
         }
       }
     }
-    if (this.died && this.allObjects().length === 0) {
-      if (this.lives > 0) {
-        this.died = false;
-        this.lives -= 1;
-        this.blasters = [this.blaster];
-      } else {
-        this.over = true;
-      }
+  }
+
+  step(delta) {
+    this.checkCollisions();
+    this.moveObjects(delta);
+    this.addOuterEnemyQueueToTube();
+    if (this.died && this.allObjectsInTube().length === 0) {
+      this.handleDeathLogic();
     }
 
     const allEnemies = [].concat(
       this.flippers,
       this.innerEnemyQueue,
-      Array(this.outerEnemies())
+      Array(this.outerQueueEnemies())
     );
-    if (!this.died && allEnemies.length === 0) {
-      let tubeShapeIdx = Math.floor(Game.TUBE_SHAPES.length * Math.random());
-      while (tubeShapeIdx === this.currentTubeIdx) {
-        tubeShapeIdx = Math.floor(Game.TUBE_SHAPES.length * Math.random());
-      }
-      this.currentTubeIdx = tubeShapeIdx;
-      this.defineTubeQuads(Game.TUBE_SHAPES[tubeShapeIdx]);
-      this.blasterBullets = [];
-      this.enemyBullets = [];
-      this.level += 1;
-      this.maxNumEnemies = Math.ceil(Math.pow(Math.log(this.level), 2));
-      this.maxNumEnemyBullets = this.maxNumEnemies;
-      this.enemyBulletZVel = Math.ceil(Math.log(this.level + 1));
-      if (this.flipperWait > 2) {
-        this.flipperWait -= 1;
-      }
-      this.queueEnemies(...Array(this.level * 2).fill('flipper'));
+    if (!this.died && this.allEnemies().length === 0) {
+      this.advanceToNextLevel();
     }
+  }
+
+  handleDeathLogic() {
+    if (this.lives > 0) {
+      this.died = false;
+      this.lives -= 1;
+      this.blasters = [this.blaster];
+    } else {
+      this.over = true;
+    }
+  }
+
+  advanceToNextLevel() {
+    let tubeShapeIdx = Math.floor(Game.TUBE_SHAPES.length * Math.random());
+    while (tubeShapeIdx === this.currentTubeIdx) {
+      tubeShapeIdx = Math.floor(Game.TUBE_SHAPES.length * Math.random());
+    }
+    this.currentTubeIdx = tubeShapeIdx;
+    this.defineTubeQuads(Game.TUBE_SHAPES[tubeShapeIdx]);
+    this.blasterBullets = [];
+    this.enemyBullets = [];
+    this.level += 1;
+    this.maxNumEnemies = Math.ceil(Math.pow(Math.log(this.level), 2));
+    this.maxNumEnemyBullets = this.maxNumEnemies;
+    this.enemyBulletZVel = Math.ceil(Math.log(this.level + 1));
+    if (this.flipperWait > 2) {
+      this.flipperWait -= 1;
+    }
+    this.queueEnemies(...Array(this.level * 2).fill('flipper'));
   }
 
 }
@@ -1467,8 +1579,8 @@ class EnemyBullet extends MovingObject {
     const posRim = Util.midpoint(tubeQuad[0], tubeQuad[1]);
     const posPit = Util.midpoint(tubeQuad[2], tubeQuad[3]);
     const easeFraction = Util.easeOutQuad(this.zPos / EnemyBullet.MAX_Z_POS);
-    const distInwards = Util.vector(posRim, posPit, easeFraction);
-    const pos = Util.addVector(posRim, distInwards);
+    const distInward = Util.vector(posRim, posPit, easeFraction);
+    const pos = Util.addVector(posRim, distInward);
     context.arc(
       pos[0], pos[1], 3 * (1 - easeFraction) + 1, 0, 2 * Math.PI, true
     );
@@ -1598,109 +1710,11 @@ class GameView {
     this.game.drawScore(context);
     this.game.drawLevel(context);
     if (this.clickToStartTimer > 0) {
-      const clickToStart = 'CLICK TO START';
-      for (let i = 0; i < clickToStart.length; i++) {
-        const pos = [181 + 11 * i, 193];
-        this.drawChar(clickToStart[i], pos, GameView.RED, context);
-      }
+      Util.drawString('CLICK TO START', [181, 193], 'small', 'align-left', GameView.RED, context);
     } else if (this.clickToStartTimer < -8) {
       this.clickToStartTimer = 16;
     }
     this.clickToStartTimer -= 1;
-  }
-
-  drawChar(char, pos, color, context) {
-    const points = {
-      topL: [0, 0],
-      topC: [4, 0],
-      topR: [8, 0],
-      midL: [0, 6],
-      midC: [4, 6],
-      midR: [8, 6],
-      btmL: [0, 11],
-      btmC: [4, 11],
-      btmR: [8, 11],
-    };
-    context.strokeStyle = color;
-    context.shadowColor = color;
-    context.shadowBlur = GameView.SHADOW_BLUR;
-    context.beginPath();
-    switch (char) {
-      case 'C':
-        context.moveTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      case 'L':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      case 'I':
-        context.moveTo(...Util.addVector(pos, points.topC));
-        context.lineTo(...Util.addVector(pos, points.btmC));
-        break;
-      case 'K':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.moveTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      case 'T':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        context.moveTo(...Util.addVector(pos, points.topC));
-        context.lineTo(...Util.addVector(pos, points.btmC));
-        break;
-      case 'O':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.topL));
-        break;
-      case 'S':
-        context.moveTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        break;
-      case 'H':
-        context.moveTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.btmL));
-        context.moveTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        context.moveTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      case 'A':
-        context.moveTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.topC));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        context.moveTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        break;
-      case 'R':
-        context.moveTo(...Util.addVector(pos, points.btmL));
-        context.lineTo(...Util.addVector(pos, points.topL));
-        context.lineTo(...Util.addVector(pos, points.topR));
-        context.lineTo(...Util.addVector(pos, points.midR));
-        context.lineTo(...Util.addVector(pos, points.midL));
-        context.lineTo(...Util.addVector(pos, points.btmR));
-        break;
-      default:
-        context.font="22px Arial";
-        context.fillStyle = GameView.RED;
-        context.fillText(char, pos[0], pos[1]);
-        break;
-    }
-    context.stroke();
   }
 
 }
