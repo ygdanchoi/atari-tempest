@@ -420,7 +420,7 @@ class MovingObject {
   draw(context) {
   }
 
-  move(delta) {
+  move() {
   }
 
   remove() {
@@ -464,7 +464,7 @@ class BlasterBullet extends MovingObject {
     context.fill();
   }
 
-  move(delta) {
+  move() {
     this.zPos += BlasterBullet.Z_VEL;
     if (this.zPos > BlasterBullet.MAX_Z_POS) {
       this.remove();
@@ -503,6 +503,9 @@ class Blaster extends MovingObject {
     const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
     this.drawTubeQuad(context, tubeQuad);
     this.drawBlaster(context, tubeQuad);
+  }
+
+  move() {
     if (this.targetXPos) {
       const numXPos = this.game.tubeQuads.length * Blaster.NUM_BLASTER_POSITIONS;
       if (this.xPos <= this.targetXPos - Blaster.NUM_BLASTER_POSITIONS) {
@@ -518,14 +521,9 @@ class Blaster extends MovingObject {
           this.changingXPos = Blaster.NUM_BLASTER_POSITIONS;
         }
       } else {
-        const oldXPos = this.xPos;
         this.changingXPos = 0;
-        this.xPos = this.targetXPos;
+        this.changeXPos(this.targetXPos - this.xPos);
         this.targetXPos = null;
-        if (Math.floor(oldXPos / Blaster.NUM_BLASTER_POSITIONS) !== Math.floor(this.xPos / Blaster.NUM_BLASTER_POSITIONS)) {
-          this.game.blasterMoveSound.currentTime = 0;
-          this.game.blasterMoveSound.play();
-        }
       }
     }
     if (this.changingXPos !== 0) {
@@ -582,7 +580,7 @@ class Blaster extends MovingObject {
 
   fireBullet() {
     const tubeQuad = this.tubeQuad;
-    if (this.game.blasterBullets.length < 8) {
+    if (this.game.blasterBullets.length < Blaster.MAX_NUM_BULLETS) {
       const blasterBullet = new BlasterBullet({
         game: this.game,
         tubeQuadIdx: this.tubeQuadIdx,
@@ -660,7 +658,7 @@ class BlasterExplosion extends MovingObject {
     return colors[(BlasterExplosion.MAX_SIZE + i / 2 + this.size * flip) % 3];
   }
 
-  move(delta) {
+  move() {
     if (this.shrinking) {
       this.size -= 1;
     } else {
@@ -752,7 +750,7 @@ class EnemyExplosion extends MovingObject {
     context.stroke();
   }
 
-  move(delta) {
+  move() {
     this.size += 0.25;
     if (this.size > 1) {
       this.remove();
@@ -1055,7 +1053,7 @@ class Game {
     return Math.floor(Game.NUM_BLASTER_POSITIONS * Util.xFractionInTubeQuad(point, boundary));
   }
 
-  moveObjects(delta) {
+  moveObjects() {
     let bulletsAndExplosions = [].concat(
       this.blasterBullets,
       this.blasterExplosions,
@@ -1064,11 +1062,11 @@ class Game {
     );
     if (this.died && bulletsAndExplosions.length > 0) {
       bulletsAndExplosions.forEach((object) => {
-        object.move(delta);
+        object.move();
       });
     } else {
       this.allObjectsInTube().forEach((object) => {
-        object.move(delta);
+        object.move();
       });
     }
   }
@@ -1114,9 +1112,9 @@ class Game {
     }
   }
 
-  step(delta) {
+  step() {
     this.checkCollisions();
-    this.moveObjects(delta);
+    this.moveObjects();
     this.addOuterEnemyQueueToTube();
     if (this.died && this.allObjectsInTube().length === 0) {
       this.handleDeathLogic();
@@ -1613,7 +1611,7 @@ class EnemyBullet extends MovingObject {
     }
   }
 
-  move(delta) {
+  move() {
     if (this.zPos === 0) {
       this.remove();
     }
@@ -1814,9 +1812,6 @@ class Flipper extends MovingObject {
     context.lineTo(...pos0Crease);
     context.closePath();
     context.stroke();
-    if (!this.game.died && Math.random() < 0.01 * this.game.maxNumEnemyBullets) {
-      this.fireBullet();
-    }
   }
 
   fireBullet() {
@@ -1861,7 +1856,7 @@ class Flipper extends MovingObject {
     }
   }
 
-  move(delta) {
+  move() {
     if (this.game.died) {
       this.zPos += 10;
       if (this.zPos > Flipper.MAX_Z_POS) {
@@ -1890,6 +1885,9 @@ class Flipper extends MovingObject {
           }
         }
       }
+    }
+    if (!this.game.died && Math.random() < 0.01 * this.game.maxNumEnemyBullets) {
+      this.fireBullet();
     }
   }
 }
