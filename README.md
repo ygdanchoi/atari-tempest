@@ -83,7 +83,7 @@ drawTubeQuads(context, color) {
   }
 }
 ```
-
+![tube](https://raw.githubusercontent.com/ygdanchoi/atari-tempest/master/docs/clippings/tube.jpg)
 
 All rendering is done in HTML 5 Canvas. I predefined several Tube shapes with outer and inner rims, and then stored an array of all the quadrilaterals. Upon mousemove, I used a public algorithm to check if it's inside a polygon, and then found the distance from the mouse point to each of the adjacent radial lines, then used the ratio of that to calculate a single xPos.
 
