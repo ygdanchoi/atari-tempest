@@ -31,7 +31,7 @@ Atari Tempest Lite is a retro browser game built with JavaScript and Canvas. Ins
 
 ## Notable Features
 
-### Rendering the Tube
+### Drawing the Tube
 
 Each tube shape is stored as a multi-dimensional array of coordinates for the rim and the pit.
 ```js
@@ -87,7 +87,127 @@ drawTubeQuads(context, color) {
 
 ### Moving the Blaster
 
-The blaster, which holds an xPos, matches its xPos to the current tube segment, and then uses the vector from the midpoint of the inner line to the midpoint of the outer line to extend from a weighted midpoint of the outer line - rendering a claw shape that bends based on its relative xPos within each tube segment.
+The `Blaster` has four relevant instance variables:
+- `this.game`
+- `this.xPos` (`0` to `119`)
+- `this.targetPos` (`0` to `119`, or `null`)
+- `this.changingXPos` (`-7`, `0`, or `7`)
+
+The canvas has a `mousemove` listener that iterates through each tube quadrilateral and determines if the mouse position is inside the quadrilateral.
+```js
+for (let i = 0; i < this.tubeQuads.length; i++) {
+  const boundary = this.tubeQuads[i];
+  if (Util.isInside(point, boundary)) {
+    this.blasters[0].targetXPos = Game.NUM_BLASTER_POSITIONS * i + this.xPosInTubeQuad(point, boundary);
+  }
+}
+```
+
+If so, then the relative position inside the quadrilateral is calculated. This `xPosInTubeQuad` plus the `xPos` for the current quadrilateral is passed as `targetPos` to the `Blaster`.
+```js
+class Game {
+  ...
+  xPosInTubeQuad(point, boundary) {
+    return Math.floor(Game.NUM_BLASTER_POSITIONS * Util.xFractionInTubeQuad(point, boundary));
+  }
+  ...
+}
+
+class Util {
+  ...
+  xFractionInTubeQuad(point, tubeQuad) {
+    const distBack = Util.distanceToLine(point, tubeQuad[0], tubeQuad[3]);
+    const distForward = Util.distanceToLine(point, tubeQuad[1], tubeQuad[2]);
+    const distTotal = distBack + distForward;
+    return distBack / distTotal;
+  },
+  ...
+}
+```
+
+If `this.targetPos` is not `null` (in case of keyboard input), the blaster determines the shortest path from `this.xPos` to `this.targetPos` and sets its moving direction `this.changingXPos` accordingly.
+```js
+move() {
+  if (this.targetXPos) {
+    const numXPos = this.game.tubeQuads.length * Blaster.NUM_BLASTER_POSITIONS;
+    if (this.xPos <= this.targetXPos - Blaster.NUM_BLASTER_POSITIONS) {
+      if (this.targetXPos - this.xPos < numXPos / 2) {
+        this.changingXPos = Blaster.NUM_BLASTER_POSITIONS;
+      } else {
+        this.changingXPos = -Blaster.NUM_BLASTER_POSITIONS;
+      }
+    } else if (this.xPos >= this.targetXPos + Blaster.NUM_BLASTER_POSITIONS) {
+      if (this.xPos - this.targetXPos < numXPos / 2) {
+        this.changingXPos = -Blaster.NUM_BLASTER_POSITIONS;
+      } else {
+        this.changingXPos = Blaster.NUM_BLASTER_POSITIONS;
+      }
+    } else {
+      this.changingXPos = 0;
+      this.changeXPos(this.targetXPos - this.xPos);
+      this.targetXPos = null;
+    }
+  }
+  if (this.changingXPos !== 0) {
+    this.changeXPos(this.changingXPos);
+  }
+  ...
+}
+```
+
+Finally, the `Blaster` wraps around if necessary and plays a sound if on a new tube segment.
+```js
+changeXPos(increment) {
+  const oldXPos = this.xPos;
+  this.xPos += increment;
+  const numXPos = this.game.tubeQuads.length * Blaster.NUM_BLASTER_POSITIONS;
+  if (this.xPos < 0) {
+    this.xPos += numXPos;
+  } else if (this.xPos >= numXPos) {
+    this.xPos -= numXPos;
+  }
+  if (Math.floor(oldXPos / Blaster.NUM_BLASTER_POSITIONS) !== Math.floor(this.xPos / Blaster.NUM_BLASTER_POSITIONS)) {
+    this.game.blasterMoveSound.currentTime = 0;
+    this.game.blasterMoveSound.play();
+  }
+}
+```
+
+### Drawing the Blaster
+
+The `Blaster` coordinates are defined based on:
+1. The rim of the current quadrilateral, i.e. the line from `tubeQuad[0]` to `tubeQuad[1]`
+2. The relative position within the current quadrilateral, i.e. `this.xPosInTubeQuad`
+  - `this.xPosInTubeQuad === this.xPos % Blaster.NUM_BLASTER_POSITIONS`
+
+```js
+drawBlaster(context, tubeQuad) {
+  const posRimFlexible = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], (this.xPosInTubeQuad + 1) / (Blaster.NUM_BLASTER_POSITIONS + 1));
+  const posRimLeft = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.9);
+  const posRimMidLeft = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.6);
+  const posRimMidRight = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.4);
+  const posRimRight = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.1);
+  const toClawBack = Util.orthogonalUnitVector(tubeQuad[0], tubeQuad[1], 10);
+  const posClawBackOuter = Util.addVector(posRimFlexible, toClawBack, 2);
+  const posClawBackInner = Util.addVector(posRimFlexible, toClawBack);
+  const posClawPointLeft = Util.addVector(posRimMidLeft, toClawBack, -1);
+  const posClawPointRight = Util.addVector(posRimMidRight, toClawBack, -1);
+  context.strokeStyle = Blaster.YELLOW;
+  context.shadowColor = Blaster.YELLOW;
+  context.shadowBlur = Blaster.SHADOW_BLUR;
+  context.beginPath();
+  context.moveTo(...tubeQuad[0]);
+  context.lineTo(...posClawBackOuter);
+  context.lineTo(...tubeQuad[1]);
+  context.lineTo(...posClawPointLeft);
+  context.lineTo(...posRimLeft);
+  context.lineTo(...posClawBackInner);
+  context.lineTo(...posRimRight);
+  context.lineTo(...posClawPointRight);
+  context.closePath();
+  context.stroke();
+}
+```
 
 ### Rendering the bullets
 

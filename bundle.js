@@ -694,7 +694,6 @@ class Blaster extends MovingObject {
     const posRimMidLeft = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.6);
     const posRimMidRight = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.4);
     const posRimRight = Util.weightedMidpoint(tubeQuad[0], tubeQuad[1], 0.1);
-    const posPitFlexible = Util.weightedMidpoint(tubeQuad[3], tubeQuad[2], (this.xPosInTubeQuad + 1) / (Blaster.NUM_BLASTER_POSITIONS + 1));
     const toClawBack = Util.orthogonalUnitVector(tubeQuad[0], tubeQuad[1], 10);
     const posClawBackOuter = Util.addVector(posRimFlexible, toClawBack, 2);
     const posClawBackInner = Util.addVector(posRimFlexible, toClawBack);
@@ -1836,7 +1835,6 @@ class GameView {
         window.open('https://ygdanchoi.github.io');
       } else if (Util.overMailTo([e.offsetX, e.offsetY])) {
         window.location.href = 'mailto:ygdanchoi@gmail.com';
-        // window.open('mailto:ygdanchoi@gmail.com');
       } else {
         this.game.over = false;
         this.game.start();
