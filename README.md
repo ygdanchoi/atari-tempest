@@ -259,57 +259,31 @@ draw(context) {
 }
 ```
 
-From the current tube rim segment, the flipper determines the index of the adjacent segment it will flip onto next. Wrap-arounds are taken into consideration.
-```js
-draw(context) {
-  ...
-  let leftTubeIdx = this.tubeQuadIdx + 1;
-  if (leftTubeIdx >= this.game.tubeQuads.length) {
-    leftTubeIdx = 0;
-  }
-  let rightTubeIdx = this.tubeQuadIdx - 1;
-  if (rightTubeIdx < 0) {
-    rightTubeIdx = this.game.tubeQuads.length - 1;
-  }
-  ...
-}
-```
-
 This is where it gets fun. Based on whether a flipper is _arriving from_ or _departing to_ an adjacent tube rim segment, it must rotate its "baseline" position around either the `posPivotLeft` or the `posPivotRight`. Fortunately, this simplifies to two cases, based on whether `this.xPosInTubeQuad` is above or below the middle point `midFlip`.
 
 Next, in order to render the rest of the bowtie shape, an `orthogonalUnitVector` must be calculated from the "baseline", and this must also rotate around the pivot point.
 
-Then, the `theta` by which the flipper must rotate is dependent on the angle formed between the current rim tube segment and the adjacent rim tube segment. Specifically, it will be half of this angle when departing and half again when arriving.
+Then, the `theta` by which the flipper must rotate is dependent on the angle formed between the current rim tube segment and the center of the entire tube pit.
 ```js
 draw(context) {
   ...
   let orthogonalVector;
-  const orthogonalHeight = 15 * (1 - 0.9 * easeFraction);
-  let theta;
-  const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
-  if (this.xPosInTubeQuad > midFlip) {
-    const farLeftTubeQuad = this.game.tubeQuads[leftTubeIdx];
-    const posFarLeft = farLeftTubeQuad[1];
-    theta = Util.theta(tubeQuad[0], tubeQuad[1], posFarLeft);
-    if (theta < Math.PI / 3) {
-      theta = 2 * Math.PI - theta;
+    const orthogonalHeight = 15 * (1 - 0.9 * easeFraction);
+    let theta;
+    const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
+    if (this.xPosInTubeQuad > midFlip) {
+      theta = Util.theta(tubeQuad[0], tubeQuad[1], this.game.tubeCenter) * 2;
+      theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
+      orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, orthogonalHeight);
+      posPivotRight = Util.rotateAroundPoint(posPivotRight, posPivotLeft, theta);
+      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
+    } else {
+      theta = Util.theta(this.game.tubeCenter, tubeQuad[0], tubeQuad[1]) * 2;
+      theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
+      orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, -orthogonalHeight);
+      posPivotLeft = Util.rotateAroundPoint(posPivotLeft, posPivotRight, theta);
+      orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
     }
-    theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
-    orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, orthogonalHeight);
-    posPivotRight = Util.rotateAroundPoint(posPivotRight, posPivotLeft, theta);
-    orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
-  } else {
-    const farRightTubeQuad = this.game.tubeQuads[rightTubeIdx];
-    const posFarRight = farRightTubeQuad[0];
-    theta = Util.theta(posFarRight, tubeQuad[0], tubeQuad[1]);
-    if (theta < Math.PI / 3) {
-      theta = 2 * Math.PI - theta;
-    }
-    theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
-    orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, -orthogonalHeight);
-    posPivotLeft = Util.rotateAroundPoint(posPivotLeft, posPivotRight, theta);
-    orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
-  }
   ...
 }
 ```
