@@ -392,6 +392,10 @@ const Util = {
       case 'I':
         context.moveTo(...Util.addVector(pos, points.topC));
         context.lineTo(...Util.addVector(pos, points.btmC));
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.moveTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
         break;
       case 'K':
         context.moveTo(...Util.addVector(pos, points.topL));
@@ -523,20 +527,20 @@ const Util = {
   },
 
   overGitHub(pos) {
-    const topLft = [121, 422];
-    const btmRgt = [184, 433];
+    const topLft = [110, 422];
+    const btmRgt = [173, 433];
     return topLft[0] <= pos[0] && pos[0] <= btmRgt[0] && topLft[1] <= pos[1] && pos[1] <= btmRgt[1];
   },
 
-  overLinkedIn(pos) {
-    const topLft = [220, 422];
+  overPortfolio(pos) {
+    const topLft = [209, 422];
     const btmRgt = [305, 433];
     return topLft[0] <= pos[0] && pos[0] <= btmRgt[0] && topLft[1] <= pos[1] && pos[1] <= btmRgt[1];
   },
 
-  overGmail(pos) {
+  overMailTo(pos) {
     const topLft = [341, 422];
-    const btmRgt = [393, 433];
+    const btmRgt = [404, 433];
     return topLft[0] <= pos[0] && pos[0] <= btmRgt[0] && topLft[1] <= pos[1] && pos[1] <= btmRgt[1];
   },
 
@@ -1174,9 +1178,9 @@ class Game {
       const point = [e.offsetX, e.offsetY];
       if (this.over && Util.overGitHub(point)) {
         e.target.style.cursor = 'pointer';
-      } else if (this.over && Util.overLinkedIn(point)) {
+      } else if (this.over && Util.overPortfolio(point)) {
         e.target.style.cursor = 'pointer';
-      } else if (this.over && Util.overGmail(point)) {
+      } else if (this.over && Util.overMailTo(point)) {
         e.target.style.cursor = 'pointer';
       } else {
         e.target.style.cursor = 'crosshair';
@@ -1828,9 +1832,9 @@ class GameView {
     if (this.game.over === true) {
       if (Util.overGitHub([e.offsetX, e.offsetY])) {
         window.open('https://github.com/ygdanchoi');
-      } else if (Util.overLinkedIn([e.offsetX, e.offsetY])) {
-        window.open('https://www.linkedin.com/in/ygdanchoi/');
-      } else if (Util.overGmail([e.offsetX, e.offsetY])) {
+      } else if (Util.overPortfolio([e.offsetX, e.offsetY])) {
+        window.open('https://ygdanchoi.github.io');
+      } else if (Util.overMailTo([e.offsetX, e.offsetY])) {
         window.location.href = 'mailto:ygdanchoi@gmail.com';
         // window.open('mailto:ygdanchoi@gmail.com');
       } else {
@@ -1868,7 +1872,7 @@ class GameView {
     Util.drawString('FLIPPERS ARE HARMLESS MID-FLIP', [99, 273], 'small', 'align-left', GameView.RED, context);
     Util.drawString('ENEMY BULLETS ARE DESTRUCTIBLE', [99, 289], 'small', 'align-left', GameView.RED, context);
     Util.drawString('CODED BY DANIEL CHOI', [148, 406], 'small', 'align-left', GameView.CYAN, context);
-    Util.drawString('GITHUB - LINKEDIN - GMAIL', [121, 422], 'small', 'align-left', GameView.BLUE, context);
+    Util.drawString('GITHUB - PORTFOLIO - MAILTO', [110, 422], 'small', 'align-left', GameView.CYAN, context);
   }
 
 }
