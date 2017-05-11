@@ -1790,6 +1790,7 @@ class Flipper extends MovingObject {
     const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
     let posPivotRight = Util.addVector(tubeQuad[0], toRimRight);
     let posPivotLeft = Util.addVector(tubeQuad[1], toRimLeft);
+    let theta;
     let orthogonalVector;
     const orthogonalHeight = 15 * (1 - 0.9 * easeFraction);
     let leftTubeIdx = this.tubeQuadIdx + 1;
@@ -1803,7 +1804,10 @@ class Flipper extends MovingObject {
     if (this.xPosInTubeQuad > midFlip) {
       const farLeftTubeQuad = this.game.tubeQuads[leftTubeIdx];
       const posFarLeft = farLeftTubeQuad[1];
-      let theta = Util.theta(tubeQuad[0], tubeQuad[1], posFarLeft);
+      theta = Util.theta(tubeQuad[0], tubeQuad[1], posFarLeft);
+      if (theta < Math.PI / 3) {
+        theta = 2 * Math.PI - theta;
+      }
       theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
       orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, orthogonalHeight);
       posPivotRight = Util.rotateAroundPoint(posPivotRight, posPivotLeft, theta);
@@ -1811,7 +1815,10 @@ class Flipper extends MovingObject {
     } else {
       const farRightTubeQuad = this.game.tubeQuads[rightTubeIdx];
       const posFarRight = farRightTubeQuad[0];
-      let theta = Util.theta(posFarRight, tubeQuad[0], tubeQuad[1]);
+      theta = Util.theta(posFarRight, tubeQuad[0], tubeQuad[1]);
+      if (theta < Math.PI / 3) {
+        theta = 2 * Math.PI - theta;
+      }
       theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
       orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, -orthogonalHeight);
       posPivotLeft = Util.rotateAroundPoint(posPivotLeft, posPivotRight, theta);
