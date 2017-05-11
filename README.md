@@ -307,3 +307,5 @@ draw(context) {
   context.stroke();
 }
 ```
+
+![flipper](https://raw.githubusercontent.com/ygdanchoi/atari-tempest/master/docs/clippings/flipper.jpg)
