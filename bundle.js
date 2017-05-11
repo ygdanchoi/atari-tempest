@@ -330,11 +330,33 @@ const Util = {
         context.moveTo(...Util.addVector(pos, points.midL));
         context.lineTo(...Util.addVector(pos, points.midR));
         break;
+      case 'B':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, Util.weightedMidpoint(points.topR, points.midR, 1/3)));
+        context.lineTo(...Util.addVector(pos, Util.weightedMidpoint(points.topR, points.midR, 2/3)));
+        context.lineTo(...Util.addVector(pos, points.midC));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.moveTo(...Util.addVector(pos, points.midC));
+        context.lineTo(...Util.addVector(pos, Util.weightedMidpoint(points.midR, points.btmR, 1/3)));
+        context.lineTo(...Util.addVector(pos, Util.weightedMidpoint(points.midR, points.btmR, 2/3)));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        break;
       case 'C':
         context.moveTo(...Util.addVector(pos, points.topR));
         context.lineTo(...Util.addVector(pos, points.topL));
         context.lineTo(...Util.addVector(pos, points.btmL));
         context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'D':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
         break;
       case 'E':
         context.moveTo(...Util.addVector(pos, points.topR));
@@ -343,6 +365,21 @@ const Util = {
         context.lineTo(...Util.addVector(pos, points.btmR));
         context.moveTo(...Util.addVector(pos, points.midL));
         context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case 'F':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case 'G':
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.midC));
         break;
       case 'H':
         context.moveTo(...Util.addVector(pos, points.topL));
@@ -368,12 +405,32 @@ const Util = {
         context.lineTo(...Util.addVector(pos, points.btmL));
         context.lineTo(...Util.addVector(pos, points.btmR));
         break;
+      case 'M':
+        context.moveTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midC));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        break;
+      case 'N':
+        context.moveTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        break;
       case 'O':
         context.moveTo(...Util.addVector(pos, points.topL));
         context.lineTo(...Util.addVector(pos, points.topR));
         context.lineTo(...Util.addVector(pos, points.btmR));
         context.lineTo(...Util.addVector(pos, points.btmL));
         context.lineTo(...Util.addVector(pos, points.topL));
+        break;
+      case 'P':
+        context.moveTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.midL));
         break;
       case 'R':
         context.moveTo(...Util.addVector(pos, points.btmL));
@@ -397,16 +454,60 @@ const Util = {
         context.moveTo(...Util.addVector(pos, points.topC));
         context.lineTo(...Util.addVector(pos, points.btmC));
         break;
+      case 'U':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        break;
       case 'V':
         context.moveTo(...Util.addVector(pos, points.topL));
         context.lineTo(...Util.addVector(pos, points.btmC));
         context.lineTo(...Util.addVector(pos, points.topR));
         break;
+      case 'Y':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.midC));
+        context.lineTo(...Util.addVector(pos, points.topR));
+        context.moveTo(...Util.addVector(pos, points.midC));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        break;
       case ' ':
         break;
+      case '-':
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case '<':
+        context.moveTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case '>':
+        context.moveTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        break;
+      case '&':
+
+        break;
+      case '*':
+        context.moveTo(...Util.addVector(pos, points.topL));
+        context.lineTo(...Util.addVector(pos, points.btmR));
+        context.moveTo(...Util.addVector(pos, points.topR));
+        context.lineTo(...Util.addVector(pos, points.btmL));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.moveTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, points.btmC));
+        break;
       default:
-        context.font="22px Arial";
-        context.fillText(char, pos[0], pos[1]);
+        context.font="18px Arial";
+        context.fillText(char, pos[0], pos[1] + 10);
         break;
     }
     context.stroke();
@@ -1717,6 +1818,12 @@ class GameView {
       this.clickToStartTimer = 16;
     }
     this.clickToStartTimer -= 1;
+    Util.drawString('POINT OR < & > TO MOVE', [132, 225], 'small', 'align-left', GameView.YELLOW, context);
+    Util.drawString('CLICK OR SPACE TO SHOOT', [132, 241], 'small', 'align-left', GameView.YELLOW, context);
+    Util.drawString('FLIPPERS ARE HARMLESS MID-FLIP', [99, 273], 'small', 'align-left', GameView.RED, context);
+    Util.drawString('ENEMY BULLETS ARE DESTRUCTIBLE', [99, 289], 'small', 'align-left', GameView.RED, context);
+    Util.drawString('CODED BY DANIEL CHOI', [148, 406], 'small', 'align-left', GameView.CYAN, context);
+    Util.drawString('GITHUB - LINKEDIN - GMAIL', [121, 422], 'small', 'align-left', GameView.BLUE, context);
   }
 
 }
@@ -1724,7 +1831,12 @@ class GameView {
 GameView.DIM_X = 512;
 GameView.DIM_Y = 450;
 GameView.BLACK = '#000000';
+GameView.WHITE = '#ffffff';
 GameView.RED = '#ff0000';
+GameView.BLUE = '#0000cc';
+GameView.CYAN = '#00ffff';
+GameView.YELLOW = '#ffff00';
+GameView.GREEN = '#00ff00';
 GameView.SHADOW_BLUR = 10;
 
 module.exports = GameView;
