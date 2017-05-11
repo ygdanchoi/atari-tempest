@@ -493,7 +493,16 @@ const Util = {
         context.lineTo(...Util.addVector(pos, points.midR));
         break;
       case '&':
-
+        context.moveTo(...Util.addVector(pos, Util.midpoint(points.topR, points.midR)));
+        context.lineTo(...Util.addVector(pos, Util.midpoint(points.topL, points.midL)));
+        context.lineTo(...Util.addVector(pos, Util.midpoint(points.btmL, points.midL)));
+        context.lineTo(...Util.addVector(pos, Util.midpoint(points.btmR, points.midR)));
+        context.moveTo(...Util.addVector(pos, points.midL));
+        context.lineTo(...Util.addVector(pos, points.midR));
+        context.moveTo(...Util.addVector(pos, points.topC));
+        context.lineTo(...Util.addVector(pos, Util.midpoint(points.topC, points.midC)));
+        context.moveTo(...Util.addVector(pos, points.btmC));
+        context.lineTo(...Util.addVector(pos, Util.midpoint(points.btmC, points.midC)));
         break;
       case '*':
         context.moveTo(...Util.addVector(pos, points.topL));
@@ -511,6 +520,24 @@ const Util = {
         break;
     }
     context.stroke();
+  },
+
+  overGitHub(pos) {
+    const topLft = [121, 422];
+    const btmRgt = [184, 433];
+    return topLft[0] <= pos[0] && pos[0] <= btmRgt[0] && topLft[1] <= pos[1] && pos[1] <= btmRgt[1];
+  },
+
+  overLinkedIn(pos) {
+    const topLft = [220, 422];
+    const btmRgt = [305, 433];
+    return topLft[0] <= pos[0] && pos[0] <= btmRgt[0] && topLft[1] <= pos[1] && pos[1] <= btmRgt[1];
+  },
+
+  overGmail(pos) {
+    const topLft = [341, 422];
+    const btmRgt = [393, 433];
+    return topLft[0] <= pos[0] && pos[0] <= btmRgt[0] && topLft[1] <= pos[1] && pos[1] <= btmRgt[1];
   },
 
 };
@@ -1144,9 +1171,18 @@ class Game {
 
   handleMouseMove(context) {
     return (e) => {
+      const point = [e.offsetX, e.offsetY];
+      if (this.over && Util.overGitHub(point)) {
+        e.target.style.cursor = 'pointer';
+      } else if (this.over && Util.overLinkedIn(point)) {
+        e.target.style.cursor = 'pointer';
+      } else if (this.over && Util.overGmail(point)) {
+        e.target.style.cursor = 'pointer';
+      } else {
+        e.target.style.cursor = 'crosshair';
+      }
       if (!this.died) {
         for (let i = 0; i < this.tubeQuads.length; i++) {
-          const point = [e.offsetX, e.offsetY];
           const boundary = this.tubeQuads[i];
           if (Util.isInside(point, boundary)) {
             this.blasters[0].targetXPos = Game.NUM_BLASTER_POSITIONS * i + this.xPosInTubeQuad(point, boundary);
@@ -1788,11 +1824,19 @@ class GameView {
 
   }
 
-  start() {
+  start(e) {
     if (this.game.over === true) {
-      this.game.over = false;
-      this.game.start();
-      this.clickToStartTimer = 16;
+      if (Util.overGitHub([e.offsetX, e.offsetY])) {
+        alert('github');
+      } else if (Util.overLinkedIn([e.offsetX, e.offsetY])) {
+        alert('linkedin');
+      } else if (Util.overGmail([e.offsetX, e.offsetY])) {
+        alert('gmail');
+      } else {
+        this.game.over = false;
+        this.game.start();
+        this.clickToStartTimer = 16;
+      }
     }
   }
 
