@@ -228,7 +228,7 @@ draw(context) {
 }
 ```
 
-A quadratic easing function is used to simulate perspective for `this.zPos`.
+A quadratic easing function is used to simulate 3D perspective based on `this.zPos`.
 ```js
 class Flipper extends MovingObject {
   ...
@@ -263,7 +263,7 @@ This is where it gets fun. Based on whether a flipper is _arriving from_ or _dep
 
 Next, in order to render the rest of the bowtie shape, an `orthogonalUnitVector` must be calculated from the "baseline", and this must also rotate around the pivot point.
 
-Then, the `theta` by which the flipper must rotate is dependent on the angle formed between the current rim tube segment and the center of the entire tube pit.
+Then, the `theta` by which the flipper must rotate equal to the angle formed from the triplet of points comprising the rim tube segment and the center of the entire tube pit, with the angle facing outward from the center.
 ```js
 draw(context) {
   ...

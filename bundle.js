@@ -1969,14 +1969,14 @@ class Flipper extends MovingObject {
     let theta;
     const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
     if (this.xPosInTubeQuad > midFlip) {
-      theta = Util.theta(tubeQuad[0], tubeQuad[1], this.game.tubeCenter) * 2;
-      theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
+      theta = Util.theta(tubeQuad[0], tubeQuad[1], this.game.tubeCenter);
+      theta *= -2 * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
       orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, orthogonalHeight);
       posPivotRight = Util.rotateAroundPoint(posPivotRight, posPivotLeft, theta);
       orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
     } else {
-      theta = Util.theta(this.game.tubeCenter, tubeQuad[0], tubeQuad[1]) * 2;
-      theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
+      theta = Util.theta(this.game.tubeCenter, tubeQuad[0], tubeQuad[1]);
+      theta *= -2 * (this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
       orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, -orthogonalHeight);
       posPivotLeft = Util.rotateAroundPoint(posPivotLeft, posPivotRight, theta);
       orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
