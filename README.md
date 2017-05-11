@@ -87,7 +87,7 @@ drawTubeQuads(context, color) {
 
 ### Moving the Blaster
 
-The `Blaster` has four relevant instance variables:
+The `Blaster` has four instance variables pertaining to movement:
 - `this.game`
 - `this.xPos` (`0` to `119`)
 - `this.targetPos` (`0` to `119`, or `null`)
@@ -125,7 +125,7 @@ class Util {
 }
 ```
 
-If `this.targetPos` is not `null` (in case of keyboard input), the blaster determines the shortest path from `this.xPos` to `this.targetPos` and sets its moving direction `this.changingXPos` accordingly.
+If `this.targetPos` is not `null` (in case of keyboard input), the blaster choose the shortest of the two paths from `this.xPos` to `this.targetPos` (clockwise/counterclockwise) and sets its direction `this.changingXPos` accordingly.
 ```js
 move() {
   if (this.targetXPos) {
@@ -208,11 +208,128 @@ drawBlaster(context, tubeQuad) {
   context.stroke();
 }
 ```
+![blaster](https://raw.githubusercontent.com/ygdanchoi/atari-tempest/master/docs/clippings/blaster.jpg)
 
-### Rendering the bullets
+### Drawing Flippers
 
-Bullets have a tubeQuadIdx and a zPos, and an x^2 polynomial function to determine its distance from the midpoint of the inner tube line towards the outer tube line.
+The appearance of a `Flipper` is determined entirely by its position along two axes:
+- `this.xPos`
+- `this.zPos`
 
-### Render the flippers
+The first step in drawing a `Flipper` is to break up `this.xPos` into two components:
+- The index of the tube segment it occupies
+- The flipper's relative lateral position within the tube segment
+```js
+draw(context) {
+  this.xPosInTubeQuad = this.xPos % Flipper.NUM_FLIPPER_POSITIONS;
+  this.tubeQuadIdx = Math.floor(this.xPos / Flipper.NUM_FLIPPER_POSITIONS);
+  const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
+  ...
+}
+```
 
-The flipper, which holds an xPos and zPos, first determines which tube segment it should be rendered at, and then uses an x^2 polynomial function to determine its distance from the center of the tube while keeping its edges on the edge of the radial segment lines. From there, depending on whether its relative xPos is less than or greater than the "middle" relative xPos value, the vector is rotated around either of the two points. Finally, an orthogonal vector is calculated in order to form a basis around which to to render the rest of the "bowtie" shape.
+A quadratic easing function is used to simulate perspective for `this.zPos`.
+```js
+class Flipper extends MovingObject {
+  ...
+  draw(context) {
+    ...
+    const easeFraction = Util.easeOutQuad(this.zPos / Flipper.MAX_Z_POS);
+    ...
+  }
+  ...
+}
+
+const Util = {
+  easeOutQuad(fraction) {
+    return 1 - Math.pow(fraction - 1, 2);
+  },
+}
+```
+
+The "baseline" position of the flipper is calculated by multiplying the vectors outward along the two radial tube lines with `easeFaction` as a scalar.
+```js
+draw(context) {
+  ...
+  const toRimRight = Util.vector(tubeQuad[0], tubeQuad[3], easeFraction);
+  const toRimLeft = Util.vector(tubeQuad[1], tubeQuad[2], easeFraction);
+  let posPivotRight = Util.addVector(tubeQuad[0], toRimRight);
+  let posPivotLeft = Util.addVector(tubeQuad[1], toRimLeft);
+  ...
+}
+```
+
+From the current tube rim segment, the flipper determines the index of the adjacent segment it will flip onto next. Wrap-arounds are taken into consideration.
+```js
+draw(context) {
+  ...
+  let leftTubeIdx = this.tubeQuadIdx + 1;
+  if (leftTubeIdx >= this.game.tubeQuads.length) {
+    leftTubeIdx = 0;
+  }
+  let rightTubeIdx = this.tubeQuadIdx - 1;
+  if (rightTubeIdx < 0) {
+    rightTubeIdx = this.game.tubeQuads.length - 1;
+  }
+  ...
+}
+```
+
+This is where it gets fun. Based on whether a flipper is _arriving from_ or _departing to_ an adjacent tube rim segment, it must rotate its "baseline" position around either the `posPivotLeft` or the `posPivotRight`. Fortunately, this simplifies to two cases, based on whether `this.xPosInTubeQuad` is above or below the middle point `midFlip`.
+
+Next, in order to render the rest of the bowtie shape, an `orthogonalUnitVector` must be calculated from the "baseline", and this must also rotate around the pivot point.
+
+Then, the `theta` by which the flipper must rotate is dependent on the angle formed between the current rim tube segment and the adjacent rim tube segment. Specifically, it will be half of this angle when departing and half again when arriving.
+```js
+draw(context) {
+  ...
+  let orthogonalVector;
+  const orthogonalHeight = 15 * (1 - 0.9 * easeFraction);
+  let theta;
+  const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
+  if (this.xPosInTubeQuad > midFlip) {
+    const farLeftTubeQuad = this.game.tubeQuads[leftTubeIdx];
+    const posFarLeft = farLeftTubeQuad[1];
+    theta = Util.theta(tubeQuad[0], tubeQuad[1], posFarLeft);
+    if (theta < Math.PI / 3) {
+      theta = 2 * Math.PI - theta;
+    }
+    theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
+    orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, orthogonalHeight);
+    posPivotRight = Util.rotateAroundPoint(posPivotRight, posPivotLeft, theta);
+    orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
+  } else {
+    const farRightTubeQuad = this.game.tubeQuads[rightTubeIdx];
+    const posFarRight = farRightTubeQuad[0];
+    theta = Util.theta(posFarRight, tubeQuad[0], tubeQuad[1]);
+    if (theta < Math.PI / 3) {
+      theta = 2 * Math.PI - theta;
+    }
+    theta *= -(this.xPosInTubeQuad - midFlip) / Flipper.NUM_FLIPPER_POSITIONS;
+    orthogonalVector = Util.orthogonalUnitVector(posPivotRight, posPivotLeft, -orthogonalHeight);
+    posPivotLeft = Util.rotateAroundPoint(posPivotLeft, posPivotRight, theta);
+    orthogonalVector = Util.rotateAroundPoint(orthogonalVector, [0, 0], theta);
+  }
+  ...
+}
+```
+
+At this point, the coordinates can be calculated, and the flipper can finally be drawn.
+```js
+draw(context) {
+  ...
+  const posCornerRight = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.1), orthogonalVector);
+  const posCreaseRight = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.2), orthogonalVector, 0.5);
+  const posCreaseLeft = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.8), orthogonalVector, 0.5);
+  const posCornerLeft = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.9), orthogonalVector);
+
+  context.moveTo(...posPivotRight);
+  context.lineTo(...posCornerLeft);
+  context.lineTo(...posCreaseLeft);
+  context.lineTo(...posPivotLeft);
+  context.lineTo(...posCornerRight);
+  context.lineTo(...posCreaseRight);
+  context.closePath();
+  context.stroke();
+}
+```

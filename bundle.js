@@ -505,7 +505,7 @@ const Util = {
         context.lineTo(...Util.addVector(pos, points.midR));
         context.moveTo(...Util.addVector(pos, points.topC));
         context.lineTo(...Util.addVector(pos, Util.midpoint(points.topC, points.midC)));
-        context.moveTo(...Util.addVector(pos, points.btmC));
+        context.lineTo(...Util.addVector(pos, points.btmC));
         context.lineTo(...Util.addVector(pos, Util.midpoint(points.btmC, points.midC)));
         break;
       case '*':
@@ -633,6 +633,8 @@ class Blaster extends MovingObject {
   constructor(options) {
     super(options);
     this.xPos = 0;
+    this.xPosInTubeQuad = this.xPos % Blaster.NUM_BLASTER_POSITIONS;
+    this.tubeQuadIdx = Math.floor(this.xPos / Blaster.NUM_BLASTER_POSITIONS);
     this.targetXPos = null;
     this.firing = false;
     this.changingXPos = 0;
@@ -1865,7 +1867,7 @@ class GameView {
       this.clickToStartTimer = 16;
     }
     this.clickToStartTimer -= 1;
-    Util.drawString('POINT OR < & > TO MOVE', [132, 225], 'small', 'align-left', GameView.YELLOW, context);
+    Util.drawString('POINT OR  < >  TO MOVE', [132, 225], 'small', 'align-left', GameView.YELLOW, context);
     Util.drawString('CLICK OR SPACE TO SHOOT', [132, 241], 'small', 'align-left', GameView.YELLOW, context);
     Util.drawString('FLIPPERS ARE HARMLESS MID-FLIP', [99, 273], 'small', 'align-left', GameView.RED, context);
     Util.drawString('ENEMY BULLETS ARE DESTRUCTIBLE', [99, 289], 'small', 'align-left', GameView.RED, context);
@@ -1939,19 +1941,15 @@ class Flipper extends MovingObject {
     this.xPosInTubeQuad = this.xPos % Flipper.NUM_FLIPPER_POSITIONS;
     this.tubeQuadIdx = Math.floor(this.xPos / Flipper.NUM_FLIPPER_POSITIONS);
     const tubeQuad = this.game.tubeQuads[this.tubeQuadIdx];
-    context.fillStyle = Flipper.RED;
+    context.strokeStyle = Flipper.RED;
     context.shadowColor = Flipper.RED;
     context.shadowBlur = Flipper.SHADOW_BLUR;
     context.beginPath();
     const easeFraction = Util.easeOutQuad(this.zPos / Flipper.MAX_Z_POS);
     const toRimRight = Util.vector(tubeQuad[0], tubeQuad[3], easeFraction);
     const toRimLeft = Util.vector(tubeQuad[1], tubeQuad[2], easeFraction);
-    const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
     let posPivotRight = Util.addVector(tubeQuad[0], toRimRight);
     let posPivotLeft = Util.addVector(tubeQuad[1], toRimLeft);
-    let theta;
-    let orthogonalVector;
-    const orthogonalHeight = 15 * (1 - 0.9 * easeFraction);
     let leftTubeIdx = this.tubeQuadIdx + 1;
     if (leftTubeIdx >= this.game.tubeQuads.length) {
       leftTubeIdx = 0;
@@ -1960,6 +1958,10 @@ class Flipper extends MovingObject {
     if (rightTubeIdx < 0) {
       rightTubeIdx = this.game.tubeQuads.length - 1;
     }
+    let orthogonalVector;
+    const orthogonalHeight = 15 * (1 - 0.9 * easeFraction);
+    let theta;
+    const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
     if (this.xPosInTubeQuad > midFlip) {
       const farLeftTubeQuad = this.game.tubeQuads[leftTubeIdx];
       const posFarLeft = farLeftTubeQuad[1];
@@ -1988,7 +1990,6 @@ class Flipper extends MovingObject {
     const posCreaseLeft = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.8), orthogonalVector, 0.5);
     const posCornerLeft = Util.addVector(Util.weightedMidpoint(posPivotRight, posPivotLeft, 0.9), orthogonalVector);
 
-    context.strokeStyle = '#ff0000';
     context.moveTo(...posPivotRight);
     context.lineTo(...posCornerLeft);
     context.lineTo(...posCreaseLeft);
