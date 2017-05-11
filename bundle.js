@@ -1848,7 +1848,11 @@ class Flipper extends MovingObject {
     if (blasterObject instanceof BlasterBullet) {
       const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
       const blasterObjectXPos = blasterObject.tubeQuadIdx * Flipper.NUM_FLIPPER_POSITIONS + midFlip;
-      return Math.abs(blasterObjectXPos - this.xPos) < Flipper.NUM_FLIPPER_POSITIONS && Math.abs(blasterObject.zPos - this.zPos) < 5;
+      const numXPos = Flipper.NUM_FLIPPER_POSITIONS * this.game.tubeQuads.length;
+      const normalCase = Math.abs(blasterObjectXPos - this.xPos) < Flipper.NUM_FLIPPER_POSITIONS;
+      const rightEdgeCase = this.xPos > numXPos - midFlip && Math.abs(blasterObjectXPos + numXPos - this.xPos) < Flipper.NUM_FLIPPER_POSITIONS;
+      const leftEdgeCase = this.xPos < midFlip && Math.abs(blasterObjectXPos - numXPos - this.xPos) < Flipper.NUM_FLIPPER_POSITIONS;
+      return (normalCase || rightEdgeCase || leftEdgeCase) && Math.abs(blasterObject.zPos - this.zPos) < 5;
     } else if (blasterObject instanceof Blaster) {
       const midFlip = Math.floor(Flipper.NUM_FLIPPER_POSITIONS / 2);
       const blasterObjectXPos = blasterObject.tubeQuadIdx * Flipper.NUM_FLIPPER_POSITIONS + midFlip;
