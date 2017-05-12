@@ -19,14 +19,14 @@ Atari Tempest Lite is a retro browser game built with JavaScript and Canvas. Ins
 |Space key|Shoot bullet|
 
 ### Objective
-- Eliminate all red flippers (150 points each)
-- Avoid flippers & enemy bullets
+- Eliminate all red flippers (150 points each).
+- Avoid flippers & enemy bullets.
 
 ### Tips
-- Flippers are harmless mid-flip
+- Flippers are harmless mid-flip.
   - If a flipper reaches the rim, it still can be shot from the adjacent segment.
   - Time your shots carefully!
-- Enemy bullets are destructible
+- Enemy bullets are destructible.
   - However, they're not worth any points.
 
 ## Notable Features
@@ -103,7 +103,7 @@ for (let i = 0; i < this.tubeQuads.length; i++) {
 }
 ```
 
-If so, then the relative position inside the quadrilateral is calculated. This `xPosInTubeQuad` plus the `xPos` for the current quadrilateral is passed as `targetPos` to the `Blaster`.
+If so, then the relative lateral position within the quadrilateral is calculated. This `xPosInTubeQuad` plus the `xPos` for the current quadrilateral is passed as `targetPos` to the `Blaster`.
 ```js
 class Game {
   ...
@@ -125,7 +125,7 @@ class Util {
 }
 ```
 
-If `this.targetPos` is not `null` (in case of keyboard input), the blaster choose the shortest of the two paths from `this.xPos` to `this.targetPos` (clockwise/counterclockwise) and sets its direction `this.changingXPos` accordingly.
+If `this.targetPos` is not `null` (in case of keyboard input), the blaster chooses the shortest of the two paths from `this.xPos` to `this.targetPos` (clockwise/counterclockwise) and sets its direction `this.changingXPos` accordingly.
 ```js
 move() {
   if (this.targetXPos) {
@@ -155,7 +155,7 @@ move() {
 }
 ```
 
-Finally, the `Blaster` wraps around if necessary and plays a sound if on a new tube segment.
+Finally, the `Blaster` wraps around if necessary and plays a sound if it has reached a new segment.
 ```js
 changeXPos(increment) {
   const oldXPos = this.xPos;
@@ -177,7 +177,7 @@ changeXPos(increment) {
 
 The `Blaster` coordinates are defined based on:
 1. The rim of the current quadrilateral, i.e. the line from `tubeQuad[0]` to `tubeQuad[1]`
-2. The relative position within the current quadrilateral, i.e. `this.xPosInTubeQuad`
+2. The relative lateral position within the current quadrilateral, i.e. `this.xPosInTubeQuad`
   - `this.xPosInTubeQuad === this.xPos % Blaster.NUM_BLASTER_POSITIONS`
 
 ```js
@@ -228,7 +228,7 @@ draw(context) {
 }
 ```
 
-A quadratic easing function is used to simulate 3D perspective based on `this.zPos`.
+A quadratic easing function is used to simulate 3D perspective with `this.zPos`.
 ```js
 class Flipper extends MovingObject {
   ...
@@ -247,7 +247,7 @@ const Util = {
 }
 ```
 
-The "baseline" position of the flipper is calculated by multiplying the vectors outward along the two radial tube lines with `easeFaction` as a scalar.
+The "baseline" position of the flipper is calculated by extending inward from the tube rim segment, using `easeFaction` as a scalar.
 ```js
 draw(context) {
   ...
@@ -263,7 +263,7 @@ This is where it gets fun. Based on whether a flipper is _arriving from_ or _dep
 
 Next, in order to render the rest of the bowtie shape, an `orthogonalUnitVector` must be calculated from the "baseline", and this must also rotate around the pivot point.
 
-Then, the `theta` by which the flipper must rotate equal to the angle formed from the triplet of points comprising the rim tube segment and the center of the entire tube pit, with the angle facing outward from the center.
+Then, the `theta` by which the flipper must rotate is equal to the angle formed from the triplet of points comprising the rim tube segment and the center of the entire tube pit, with the angle facing outward from the center.
 ```js
 draw(context) {
   ...
