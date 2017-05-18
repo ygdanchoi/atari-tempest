@@ -1890,7 +1890,7 @@ class GameView {
       } else if (Util.overPortfolio([e.offsetX, e.offsetY])) {
         window.open('https://ygdanchoi.github.io');
       } else if (Util.overMailTo([e.offsetX, e.offsetY])) {
-        window.location.href = 'mailto:ygdanchoi@gmail.com';
+        window.open('mailto:ygdanchoi@gmail.com');
       } else {
         this.game.over = false;
         this.game.start();
